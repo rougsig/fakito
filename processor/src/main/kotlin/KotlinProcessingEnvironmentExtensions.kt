@@ -1,18 +1,19 @@
 package com.github.rougsig.mviautomock.processor
 
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
+import me.eugeniomarletti.kotlin.processing.KotlinProcessingEnvironment
 import javax.lang.model.element.Element
 import javax.tools.Diagnostic
 
-fun KotlinAbstractProcessor.note(message: String, element: Element) {
+internal fun KotlinProcessingEnvironment.note(message: String, element: Element) {
   messager.printMessage(Diagnostic.Kind.NOTE, message, element)
 }
 
-fun KotlinAbstractProcessor.warning(message: String, element: Element) {
+internal fun KotlinProcessingEnvironment.warning(message: String, element: Element) {
   messager.printMessage(Diagnostic.Kind.WARNING, message, element)
 }
 
-fun KotlinAbstractProcessor.error(message: String, element: Element) {
+internal fun KotlinProcessingEnvironment.error(message: String, element: Element) {
   messager.printMessage(Diagnostic.Kind.ERROR, message, element)
 }
 

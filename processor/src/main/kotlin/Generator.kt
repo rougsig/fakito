@@ -2,6 +2,6 @@ package com.github.rougsig.mviautomock.processor
 
 import com.squareup.kotlinpoet.FileSpec
 
-interface Generator {
-  fun generateFile(): FileSpec
+internal interface Generator<T> {
+  fun generateFile(type: T): FileSpec
 }

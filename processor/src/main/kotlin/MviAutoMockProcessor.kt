@@ -2,7 +2,6 @@ package com.github.rougsig.mviautomock.processor
 
 import com.github.rougsig.mviautomock.annotations.MockView
 import com.google.auto.service.AutoService
-import com.squareup.kotlinpoet.asClassName
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
 import java.io.File
 import javax.annotation.processing.Processor
@@ -14,26 +13,29 @@ private const val OPTION_GENERATED = "mviautomock.generated"
 
 @AutoService(Processor::class)
 class MviAutoMockProcessor : KotlinAbstractProcessor() {
-  private val annotationClass = MockView::class.java
+  private val mockViewAnnotation = MockView::class.java
 
-  override fun getSupportedAnnotationTypes() = setOf(annotationClass.canonicalName)
+  override fun getSupportedAnnotationTypes() = setOf(mockViewAnnotation.canonicalName)
 
   override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latest()
 
   override fun getSupportedOptions() = setOf(OPTION_GENERATED)
 
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
-    val annotatedElements = roundEnv
-      .getElementsAnnotatedWith(annotationClass)
-      .toSet()
+    for (type in roundEnv.getElementsAnnotatedWith(mockViewAnnotation)) {
+      val mockViewType = MockViewType.get(this, type) ?: continue
+      mockViewGenerator.generateAndWrite(mockViewType)
+    }
+    return true
+  }
 
-    annotatedElements
-      .forEachIndexed { index, el ->
-        val packageName = (el as TypeElement).asClassName().packageName
-        val generatedDir = File("$generatedDir/${packageName.replace(".", "/")}").also { it.mkdirs() }
-        val file = File(generatedDir, "MviAutoMockProcessor.kt")
-        file.writeText("class MviAutoMockProcessor {}")
-      }
-    return false
+  private fun <T> Generator<T>.generateAndWrite(type: T) {
+    val fileSpec = generateFile(type)
+
+    val outputDirPath = "$generatedDir/${fileSpec.packageName.replace(".", "/")}"
+    val outputDir = File(outputDirPath).also { it.mkdirs() }
+
+    val file = File(outputDir, fileSpec.name)
+    file.writeText(fileSpec.toString())
   }
 }
