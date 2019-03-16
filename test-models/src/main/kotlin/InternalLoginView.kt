@@ -5,7 +5,7 @@ import com.github.rougsig.mviautomock.annotations.MockView
 import io.reactivex.Observable
 
 @MockView
-interface LoginView : MviView<FormFieldValues> {
+internal interface InternalLoginView : MviView<FormFieldValues> {
   fun navigateBackIntent(): Observable<Unit>
 
   fun callSupportIntent(): Observable<Unit>
@@ -14,3 +14,4 @@ interface LoginView : MviView<FormFieldValues> {
 
   fun otpCodeChangeIntent(): Observable<CharSequence>
 }
+
