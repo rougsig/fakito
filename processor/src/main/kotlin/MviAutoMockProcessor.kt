@@ -1,12 +1,10 @@
 package com.github.rougsig.mviautomock.processor
 
 import com.github.rougsig.mviautomock.annotations.MockView
-
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.asClassName
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
 import java.io.File
-import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
@@ -17,18 +15,12 @@ private const val OPTION_GENERATED = "mviautomock.generated"
 @AutoService(Processor::class)
 class MviAutoMockProcessor : KotlinAbstractProcessor() {
   private val annotationClass = MockView::class.java
-  private lateinit var logger: Logger
 
   override fun getSupportedAnnotationTypes() = setOf(annotationClass.canonicalName)
 
   override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latest()
 
   override fun getSupportedOptions() = setOf(OPTION_GENERATED)
-
-  override fun init(processingEnv: ProcessingEnvironment) {
-    super.init(processingEnv)
-    logger = Logger(messager)
-  }
 
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
     val annotatedElements = roundEnv
