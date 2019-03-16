@@ -16,4 +16,12 @@ class TestMockViewGenerator : APTest("com.example.mvi") {
       processor = MviAutoMockProcessor()
     ))
   }
+
+  fun testNestedInternalLoginView() {
+    testProcessor(AnnotationProcessor(
+      sourceFiles = listOf("MockNestedInternalLoginView.java"),
+      destinationFile = "NestedInternalLoginViewGeneratedMock.kt.txt",
+      processor = MviAutoMockProcessor()
+    ))
+  }
 }

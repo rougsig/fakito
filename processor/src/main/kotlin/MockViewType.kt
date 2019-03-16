@@ -38,12 +38,12 @@ internal data class MockViewType(
       val viewElement = (element.interfaces
         .find { it.asTypeName().toString() == viewClassName }!! as DeclaredType)
         .asElement() as TypeElement
-
-      val viewElementTypeMetadata = viewElement.kotlinMetadata as? KotlinClassMetadata ?: return null
-
-      val proto = viewElementTypeMetadata.data.classProto
+      
       val intents = viewElement.enclosedElements.mapNotNull { IntentType.get(env, it) }
-      val isInternal = proto.visibility!! == ProtoBuf.Visibility.INTERNAL
+      val isInternal = viewElement.getParents()
+        .plus(viewElement)
+        .filter { it.kotlinMetadata != null }
+        .any { (it.kotlinMetadata as KotlinClassMetadata).data.classProto.visibility == ProtoBuf.Visibility.INTERNAL }
 
       return MockViewType(
         intents,
@@ -77,4 +77,9 @@ private fun AnnotationMirror.getFieldByName(fieldName: String): AnnotationValue?
       element.simpleName.toString() == fieldName
     }
     ?.value
+}
+
+private fun Element.getParents(list: MutableList<Element> = mutableListOf()): List<Element> {
+  if (enclosingElement == null) return list.reversed()
+  return enclosingElement.getParents(list.apply { add(enclosingElement) })
 }
