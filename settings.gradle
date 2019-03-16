@@ -1,1 +1,1 @@
-include ':annotations', ':processor', ':runtime', ":test-models"
+include ':processor', ':runtime', ":test-models"

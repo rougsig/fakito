@@ -1,7 +1,7 @@
 package com.example.mvi
 
 import com.example.mvi.entities.FormFieldValues
-import com.github.rougsig.mviautomock.annotations.MockView
+import com.github.rougsig.mviautomock.runtime.MockView
 import io.reactivex.Observable
 
 @MockView

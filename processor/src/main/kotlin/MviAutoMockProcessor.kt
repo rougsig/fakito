@@ -1,6 +1,6 @@
 package com.github.rougsig.mviautomock.processor
 
-import com.github.rougsig.mviautomock.annotations.MockView
+import com.github.rougsig.mviautomock.runtime.MockView
 import com.google.auto.service.AutoService
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
 import java.io.File
