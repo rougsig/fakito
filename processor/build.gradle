@@ -21,9 +21,9 @@ dependencies {
     kapt 'com.google.auto.service:auto-service:1.0-rc4'
 
     testImplementation 'junit:junit:4.12'
-    //To generate stubs for data classes
     kaptTest 'com.google.auto.service:auto-service:1.0-rc4'
     testCompile "com.google.testing.compile:compile-testing:0.15"
+    testCompile project(path: ':test-models'    )
     testCompile fileTree(dir: './src/test/libs', includes: ['*.jar'])
     def toolsJar = Jvm.current().getToolsJar()
 

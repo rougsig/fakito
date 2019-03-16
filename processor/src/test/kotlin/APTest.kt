@@ -21,9 +21,9 @@ abstract class APTest(
 
     processor.forEach { (name, sources, dest, proc, error) ->
 
-      val parent = File(".").absoluteFile.parent
+      val parent = File(".").absoluteFile.parentFile.parent
 
-      val stubs = Paths.get(parent, "build", "tmp", "kapt3", "stubs", "main", *pckg.split(".").toTypedArray()).toFile()
+      val stubs = Paths.get(parent, "test-models", "build", "tmp", "kapt3", "stubs", "main", *pckg.split(".").toTypedArray()).toFile()
       val expectedDir = Paths.get("", "src", "test", "resources", *pckg.split(".").toTypedArray()).toFile()
 
       if (dest == null && error == null) {
@@ -50,7 +50,6 @@ abstract class APTest(
           .hadErrorContaining(error)
 
       } else {
-
         CompilationSubject.assertThat(compilation)
           .succeeded()
 
@@ -59,8 +58,21 @@ abstract class APTest(
 
         val expected = File(expectedDir, dest).readText()
         val actual = File(actualFileLocation(targetDir)).listFiles()[0].readText()
-        assertEquals(actual.replace("\r\n", "\n"), expected.replace("\r\n", "\n"))
+        assertSameLines(expected, actual)
       }
     }
+  }
+
+  fun assertSameLines(expected: String, actual: String) {
+    assertSameLines(expected, actual, true)
+  }
+
+  fun assertSameLines(expected: String, actual: String, trimBeforeComparing: Boolean) {
+    fun String.convertLineSeparators() = replace("\r\n", "\n")
+
+    assertEquals(
+      (if (trimBeforeComparing) expected.trim { it <= ' ' } else expected).convertLineSeparators(),
+      (if (trimBeforeComparing) actual.trim { it <= ' ' } else actual).convertLineSeparators()
+    )
   }
 }
