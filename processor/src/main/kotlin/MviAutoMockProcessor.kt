@@ -35,7 +35,7 @@ class MviAutoMockProcessor : KotlinAbstractProcessor() {
     val outputDirPath = "$generatedDir/${fileSpec.packageName.replace(".", "/")}"
     val outputDir = File(outputDirPath).also { it.mkdirs() }
 
-    val file = File(outputDir, fileSpec.name)
+    val file = File(outputDir, "${fileSpec.name}.kt")
     file.writeText(fileSpec.toString())
   }
 }

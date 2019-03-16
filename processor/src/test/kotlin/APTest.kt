@@ -64,9 +64,16 @@ abstract class APTest(
 
         assertEquals(targetDir.listFiles().size, 1)
 
-        val expected = File(expectedDir, dest).readText()
-        val actual = File(actualFileLocation(targetDir)).listFiles()[0].readText()
-        assertSameLines(expected, actual)
+        val expectedFile = File(expectedDir, dest)
+        val actualFile = File(actualFileLocation(targetDir)).listFiles().first()
+        assertEquals(
+          expectedFile.nameWithoutExtension, // get expected fileName without .txt extension
+          actualFile.name
+        )
+        assertSameLines(
+          expectedFile.readText(),
+          actualFile.readText()
+        )
       }
     }
   }
