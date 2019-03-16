@@ -19,8 +19,9 @@ internal data class MockViewType(
   val intents: List<IntentType>,
   val isInternal: Boolean
 ) {
-  val viewName = element.className
-  val packageName = viewName.packageName
+  val className = element.className
+  val viewName = className.simpleName
+  val packageName = className.packageName
 
   companion object {
     fun get(env: KotlinProcessingEnvironment, element: Element): MockViewType? {
