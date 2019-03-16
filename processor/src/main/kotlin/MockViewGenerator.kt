@@ -1,25 +1,21 @@
 package com.github.rougsig.mviautomock.processor
 
-import com.jakewharton.rxrelay2.PublishRelay
-import com.jakewharton.rxrelay2.Relay
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import io.reactivex.Observable
 
 internal val mockViewGenerator: MockViewGenerator = MockViewGenerator()
 
 internal class MockViewGenerator : Generator<MockViewType> {
-  private val relayTypeName = Relay::class.asTypeName()
-  private val observableTypeName = Observable::class.asTypeName()
+
   private val unitTypeName = Unit::class.asTypeName()
   private val createDefaultRelayFunName = "createDefaultRelay"
 
   private fun createParameterizedRelayType(type: TypeName): TypeName {
-    return relayTypeName.parameterizedBy(type)
+    return relayClassName.parameterizedBy(type)
   }
 
   private fun createParameterizedObservableType(type: TypeName): TypeName {
-    return observableTypeName.parameterizedBy(type)
+    return observableClassName.parameterizedBy(type)
   }
 
   override fun generateFile(type: MockViewType): FileSpec {
@@ -37,7 +33,7 @@ internal class MockViewGenerator : Generator<MockViewType> {
           .addModifiers(KModifier.PROTECTED, KModifier.OPEN)
           .addTypeVariable(TypeVariableName("T"))
           .returns(createParameterizedRelayType(TypeVariableName("T")))
-          .addStatement("return %T.create<T>()", PublishRelay::class.asTypeName())
+          .addStatement("return %T.create<T>()", publishRelayClassName)
           .build())
         .addProperties(type.intents.map { intent ->
           PropertySpec
