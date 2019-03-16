@@ -2,7 +2,7 @@ package com.github.rougsig.mviautomock.processor
 
 import com.github.rougsig.mviautomock.annotations.MockView
 import com.google.auto.service.AutoService
-import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asClassName
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
 import java.io.File
 import javax.annotation.processing.ProcessingEnvironment
@@ -21,10 +21,10 @@ class MockProcessor : KotlinAbstractProcessor() {
     )
   }
 
-  private val annotation = MockView::class.java
+  private val annotationClass = MockView::class.java
   private lateinit var logger: Logger
 
-  override fun getSupportedAnnotationTypes() = setOf(annotation.canonicalName)
+  override fun getSupportedAnnotationTypes() = setOf(annotationClass.canonicalName)
 
   override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latest()
 
@@ -36,20 +36,17 @@ class MockProcessor : KotlinAbstractProcessor() {
   }
 
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
-    return true
-  }
+    val annotatedElements = roundEnv
+      .getElementsAnnotatedWith(annotationClass)
+      .toSet()
 
-  private fun Generator.generateAndWrite() {
-    val fileSpec = generateFile()
-    val adapterName = fileSpec.members.filterIsInstance<TypeSpec>().first().name!!
-    val outputDir = generatedDir ?: mavenGeneratedDir(adapterName)
-    fileSpec.writeTo(outputDir)
-  }
-
-  private fun mavenGeneratedDir(adapterName: String): File {
-    // Hack since the maven plugin doesn't supply `kapt.kotlin.generated` option
-    // Bug filed at https://youtrack.jetbrains.com/issue/KT-22783
-    val file = filer.createSourceFile(adapterName).toUri().let(::File)
-    return file.parentFile.also { file.delete() }
+    annotatedElements
+      .forEachIndexed { index, el ->
+        val packageName = (el as TypeElement).asClassName().packageName
+        val generatedDir = File("$generatedDir/${packageName.replace(".", "/")}").also { it.mkdirs() }
+        val file = File(generatedDir, "MockProcessor.kt")
+        file.writeText("class MockProcessor {}")
+      }
+    return false
   }
 }
