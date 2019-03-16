@@ -27,7 +27,7 @@ internal class MockViewGenerator : Generator<MockViewType> {
         .classBuilder(className)
         .apply { if (type.isInternal) addModifiers(KModifier.INTERNAL) }
         .addModifiers(KModifier.ABSTRACT)
-        .addSuperinterface(type.className)
+        .addSuperinterface(type.viewElement.asClassName())
         .addCreateDefaultRelayFun()
         .addRelayProperties(type.intents)
         .addSendIntentFunctions(type.intents)

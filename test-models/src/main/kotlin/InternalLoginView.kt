@@ -4,7 +4,6 @@ import com.example.mvi.entities.FormFieldValues
 import com.github.rougsig.mviautomock.runtime.MockView
 import io.reactivex.Observable
 
-@MockView
 internal interface InternalLoginView : MviView<FormFieldValues> {
   fun navigateBackIntent(): Observable<Unit>
 
