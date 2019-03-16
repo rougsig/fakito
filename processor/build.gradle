@@ -30,3 +30,5 @@ dependencies {
                 "Building with a JRE or JDK9 is currently not supported.")
     testImplementation files(toolsJar)
 }
+
+apply from: '../gradle/gradle-mvn-push.gradle'
