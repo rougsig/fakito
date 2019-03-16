@@ -5,7 +5,7 @@ class TestNothing : APTest("com.example.mvi") {
     testProcessor(AnnotationProcessor(
       sourceFiles = listOf("LoginView.java"),
       destinationFile = "LoginViewGeneratedMock.kt",
-      processor = MockProcessor()
+      processor = MviAutoMockProcessor()
     ))
   }
 }
