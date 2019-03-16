@@ -29,7 +29,7 @@ internal class IntentType(
 
       return IntentType(
         intentName,
-        valueType
+        valueType.javaToKotlinType()
       )
     }
   }

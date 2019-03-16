@@ -4,7 +4,7 @@ import com.example.mvi.entities.FormFieldValues
 import com.jakewharton.rxrelay2.PublishRelay
 import com.jakewharton.rxrelay2.Relay
 import io.reactivex.Observable
-import java.lang.CharSequence
+import kotlin.CharSequence
 import kotlin.Unit
 
 abstract class LoginViewGeneratedMock : LoginView {
