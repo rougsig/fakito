@@ -9,30 +9,34 @@ import junit.framework.TestCase
 import java.io.File
 import java.nio.file.Paths
 
+private const val TEST_MODELS_STUB_DIR = "test-models/build/tmp/kapt3/stubs/main"
+private const val TEST_RESOURCES_DIR = "src/test/resources"
+
 abstract class APTest(
-  private val pckg: String,
+  private val packageName: String,
   private val enforcePackage: Boolean = true
 ) : TestCase() {
+
   fun testProcessor(
     vararg processor: AnnotationProcessor,
     generationDir: File = Files.createTempDir(),
     actualFileLocation: (File) -> String = { it.path }
   ) {
+    processor.forEach { (sources, dest, proc, error) ->
 
-    processor.forEach { (name, sources, dest, proc, error) ->
-
-      val parent = File(".").absoluteFile.parentFile.parent
-
-      val stubs = Paths.get(parent, "test-models", "build", "tmp", "kapt3", "stubs", "main", *pckg.split(".").toTypedArray()).toFile()
-      val expectedDir = Paths.get("", "src", "test", "resources", *pckg.split(".").toTypedArray()).toFile()
-
-      if (dest == null && error == null) {
-        throw Exception("Destination file and error cannot be both null")
+      require(!(dest.isNullOrBlank() && error.isNullOrBlank())) {
+        "Destination file and error cannot be both null"
       }
 
-      if (dest != null && error != null) {
-        throw Exception("Destination file or error must be set")
+      require(dest.isNullOrBlank() || error.isNullOrBlank()) {
+        "Destination file or error must be set"
       }
+
+      val projectRoot = File(".").absoluteFile.parentFile.parent
+      val packageNameDir = packageName.replace(".", "/")
+
+      val stubs = Paths.get(projectRoot, TEST_MODELS_STUB_DIR, packageNameDir).toFile()
+      val expectedDir = Paths.get(TEST_RESOURCES_DIR, packageNameDir).toFile()
 
       val compilation = Compiler.javac()
         .withProcessors(proc)
@@ -43,17 +47,21 @@ abstract class APTest(
         })
 
       if (error != null) {
-
-        CompilationSubject.assertThat(compilation)
+        CompilationSubject
+          .assertThat(compilation)
           .failed()
-        CompilationSubject.assertThat(compilation)
+        CompilationSubject
+          .assertThat(compilation)
           .hadErrorContaining(error)
-
       } else {
-        CompilationSubject.assertThat(compilation)
+        CompilationSubject
+          .assertThat(compilation)
           .succeeded()
 
-        val targetDir = if (enforcePackage) File("${generationDir.absolutePath}/${pckg.replace(".", "/")}") else generationDir
+        val targetDir =
+          if (enforcePackage) File("${generationDir.absolutePath}/$packageNameDir")
+          else generationDir
+
         assertEquals(targetDir.listFiles().size, 1)
 
         val expected = File(expectedDir, dest).readText()
@@ -63,16 +71,11 @@ abstract class APTest(
     }
   }
 
-  fun assertSameLines(expected: String, actual: String) {
-    assertSameLines(expected, actual, true)
-  }
-
-  fun assertSameLines(expected: String, actual: String, trimBeforeComparing: Boolean) {
+  private fun assertSameLines(expected: String, actual: String) {
     fun String.convertLineSeparators() = replace("\r\n", "\n")
-
     assertEquals(
-      (if (trimBeforeComparing) expected.trim { it <= ' ' } else expected).convertLineSeparators(),
-      (if (trimBeforeComparing) actual.trim { it <= ' ' } else actual).convertLineSeparators()
+      expected.trim().convertLineSeparators(),
+      actual.trim().convertLineSeparators()
     )
   }
 }
