@@ -19,7 +19,7 @@ internal class MockViewGenerator : Generator<MockViewType> {
   }
 
   override fun generateFile(type: MockViewType): FileSpec {
-    val className = "${type.viewName}GeneratedMock"
+    val className = "${type.viewName}Generated"
 
     return FileSpec
       .builder(type.packageName, className)

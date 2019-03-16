@@ -38,7 +38,7 @@ internal data class MockViewType(
       val viewElement = (element.interfaces
         .find { it.asTypeName().toString() == viewClassName }!! as DeclaredType)
         .asElement() as TypeElement
-      
+
       val intents = viewElement.enclosedElements.mapNotNull { IntentType.get(env, it) }
       val isInternal = viewElement.getParents()
         .plus(viewElement)
@@ -49,7 +49,7 @@ internal data class MockViewType(
         intents,
         isInternal,
         viewElement,
-        viewElement.className.simpleName,
+        element.className.simpleName,
         element.className.packageName
       )
     }

@@ -4,7 +4,7 @@ class TestMockViewGenerator : APTest("com.example.mvi") {
   fun testLoginView() {
     testProcessor(AnnotationProcessor(
       sourceFiles = listOf("MockLoginView.java"),
-      destinationFile = "LoginViewGeneratedMock.kt.txt",
+      destinationFile = "MockLoginViewGenerated.kt.txt",
       processor = MviAutoMockProcessor()
     ))
   }
@@ -12,7 +12,7 @@ class TestMockViewGenerator : APTest("com.example.mvi") {
   fun testInternalLoginView() {
     testProcessor(AnnotationProcessor(
       sourceFiles = listOf("MockInternalLoginView.java"),
-      destinationFile = "InternalLoginViewGeneratedMock.kt.txt",
+      destinationFile = "MockInternalLoginViewGenerated.kt.txt",
       processor = MviAutoMockProcessor()
     ))
   }
@@ -20,7 +20,7 @@ class TestMockViewGenerator : APTest("com.example.mvi") {
   fun testNestedInternalLoginView() {
     testProcessor(AnnotationProcessor(
       sourceFiles = listOf("MockNestedInternalLoginView.java"),
-      destinationFile = "NestedInternalLoginViewGeneratedMock.kt.txt",
+      destinationFile = "MockNestedInternalLoginViewGenerated.kt.txt",
       processor = MviAutoMockProcessor()
     ))
   }
