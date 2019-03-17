@@ -15,6 +15,7 @@ import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.TypeMirror
 import kotlin.reflect.KClass
 
 internal data class FakeViewType(
@@ -34,11 +35,10 @@ internal data class FakeViewType(
       }
 
       val annotation = element.getAnnotationMirror(FakeView::class)
-      val viewClassName = annotation!!.getFieldByName("viewClass")!!.value.toString()
-
-      val viewElement = (element.interfaces
-        .find { it.asTypeName().toString() == viewClassName }!! as DeclaredType)
-        .asElement() as TypeElement
+      val viewElement = ((env.typeUtils
+        .asElement((annotation!!.getFieldByName("viewClass")!!.value as TypeMirror))
+        .asType() as DeclaredType)
+        .asElement() as TypeElement)
 
       val intents = viewElement.enclosedElements.mapNotNull { IntentType.get(env, it) }
       val isInternal = viewElement.getParents()
