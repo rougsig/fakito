@@ -1,4 +1,4 @@
-package com.github.rougsig.mviautomock.processor
+package com.github.rougsig.mvifake.processor
 
 import javax.annotation.processing.Processor
 

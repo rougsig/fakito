@@ -1,24 +1,24 @@
-package com.github.rougsig.mviautomock.processor
+package com.github.rougsig.mvifake.processor
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
-internal val mockViewGenerator: MockViewGenerator = MockViewGenerator()
+internal val fakeViewGenerator: FakeViewGenerator = FakeViewGenerator()
 
-internal class MockViewGenerator : Generator<MockViewType> {
+internal class FakeViewGenerator : Generator<FakeViewType> {
 
   private val unitTypeName = Unit::class.asTypeName()
   private val createDefaultRelayFunName = "createDefaultRelay"
 
   private fun createParameterizedRelayType(type: TypeName): TypeName {
-    return relayClassName.parameterizedBy(type)
+    return RELAY_CLASS_NAME.parameterizedBy(type)
   }
 
   private fun createParameterizedObservableType(type: TypeName): TypeName {
-    return observableClassName.parameterizedBy(type)
+    return OBSERVABLE_CLASS_NAME.parameterizedBy(type)
   }
 
-  override fun generateFile(type: MockViewType): FileSpec {
+  override fun generateFile(type: FakeViewType): FileSpec {
     val className = "${type.viewName}Generated"
 
     return FileSpec
@@ -42,7 +42,7 @@ internal class MockViewGenerator : Generator<MockViewType> {
       .addModifiers(KModifier.PROTECTED, KModifier.OPEN)
       .addTypeVariable(TypeVariableName("T"))
       .returns(createParameterizedRelayType(TypeVariableName("T")))
-      .addStatement("return %T.create<T>()", publishRelayClassName)
+      .addStatement("return %T.create<T>()", PUBLISH_RELAY_CLASS_NAME)
       .build())
   }
 

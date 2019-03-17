@@ -7,7 +7,7 @@ import io.reactivex.Observable
 import kotlin.CharSequence
 import kotlin.Unit
 
-abstract class MockLoginViewGenerated : LoginView {
+internal abstract class FakeInternalLoginViewGenerated : InternalLoginView {
     protected open val navigateBackIntent: Relay<Unit> by lazy { createDefaultRelay<Unit>() }
 
     protected open val callSupportIntent: Relay<Unit> by lazy { createDefaultRelay<Unit>() }

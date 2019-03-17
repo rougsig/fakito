@@ -1,6 +1,6 @@
-package com.github.rougsig.mviautomock.processor
+package com.github.rougsig.mvifake.processor
 
-import com.github.rougsig.mviautomock.runtime.MockView
+import com.github.rougsig.mvifake.runtime.FakeView
 import com.google.auto.service.AutoService
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
 import java.io.File
@@ -9,22 +9,22 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 
-private const val OPTION_GENERATED = "mviautomock.generated"
+private const val OPTION_GENERATED = "mvifake.generated"
 
 @AutoService(Processor::class)
-class MviAutoMockProcessor : KotlinAbstractProcessor() {
-  private val mockViewAnnotation = MockView::class.java
+class MviFakeProcessor : KotlinAbstractProcessor() {
+  private val fakeViewAnnotation = FakeView::class.java
 
-  override fun getSupportedAnnotationTypes() = setOf(mockViewAnnotation.canonicalName)
+  override fun getSupportedAnnotationTypes() = setOf(fakeViewAnnotation.canonicalName)
 
   override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latest()
 
   override fun getSupportedOptions() = setOf(OPTION_GENERATED)
 
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
-    for (type in roundEnv.getElementsAnnotatedWith(mockViewAnnotation)) {
-      val mockViewType = MockViewType.get(this, type) ?: continue
-      mockViewGenerator.generateAndWrite(mockViewType)
+    for (type in roundEnv.getElementsAnnotatedWith(fakeViewAnnotation)) {
+      val fakeViewType = FakeViewType.get(this, type) ?: continue
+      fakeViewGenerator.generateAndWrite(fakeViewType)
     }
     return true
   }

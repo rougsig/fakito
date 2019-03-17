@@ -1,9 +1,9 @@
-package com.github.rougsig.mviautomock.runtime
+package com.github.rougsig.mvifake.runtime
 
 import kotlin.reflect.KClass
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
-annotation class MockView(
+annotation class FakeView(
   val viewClass: KClass<*>
 )

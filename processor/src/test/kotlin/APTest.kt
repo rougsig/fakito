@@ -1,4 +1,4 @@
-package com.github.rougsig.mviautomock.processor
+package com.github.rougsig.mvifake.processor
 
 import com.google.common.collect.ImmutableList
 import com.google.common.io.Files

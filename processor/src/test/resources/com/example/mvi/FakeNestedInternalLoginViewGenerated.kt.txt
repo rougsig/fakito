@@ -7,7 +7,7 @@ import io.reactivex.Observable
 import kotlin.CharSequence
 import kotlin.Unit
 
-internal abstract class MockNestedInternalLoginViewGenerated : Screen.NestedInternalLoginView {
+internal abstract class FakeNestedInternalLoginViewGenerated : Screen.NestedInternalLoginView {
     protected open val navigateBackIntent: Relay<Unit> by lazy { createDefaultRelay<Unit>() }
 
     protected open val callSupportIntent: Relay<Unit> by lazy { createDefaultRelay<Unit>() }

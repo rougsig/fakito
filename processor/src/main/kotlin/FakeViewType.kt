@@ -1,6 +1,6 @@
-package com.github.rougsig.mviautomock.processor
+package com.github.rougsig.mvifake.processor
 
-import com.github.rougsig.mviautomock.runtime.MockView
+import com.github.rougsig.mvifake.runtime.FakeView
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.asTypeName
@@ -16,7 +16,7 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import kotlin.reflect.KClass
 
-internal data class MockViewType(
+internal data class FakeViewType(
   val intents: List<IntentType>,
   val isInternal: Boolean,
   val viewElement: TypeElement,
@@ -25,14 +25,14 @@ internal data class MockViewType(
 ) {
 
   companion object {
-    fun get(env: KotlinProcessingEnvironment, element: Element): MockViewType? {
+    fun get(env: KotlinProcessingEnvironment, element: Element): FakeViewType? {
       val typeMetadata = element.kotlinMetadata
       if (element !is TypeElement || typeMetadata !is KotlinClassMetadata) {
-        env.error("@MockView can't be applied to $element: must be kotlin class", element)
+        env.error("@FakeView can't be applied to $element: must be kotlin class", element)
         return null
       }
 
-      val annotation = element.getAnnotationMirror(MockView::class)
+      val annotation = element.getAnnotationMirror(FakeView::class)
       val viewClassName = annotation!!.getFieldByName("viewClass")!!.value.toString()
 
       val viewElement = (element.interfaces
@@ -45,7 +45,7 @@ internal data class MockViewType(
         .filter { it.kotlinMetadata != null }
         .any { (it.kotlinMetadata as KotlinClassMetadata).data.classProto.visibility == ProtoBuf.Visibility.INTERNAL }
 
-      return MockViewType(
+      return FakeViewType(
         intents,
         isInternal,
         viewElement,
