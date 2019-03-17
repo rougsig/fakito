@@ -1,5 +1,10 @@
-package com.github.rougsig.mvifake.processor
+package com.github.rougsig.mvifake.processor.viewgenerator
 
+import com.github.rougsig.mvifake.processor.base.Generator
+import com.github.rougsig.mvifake.processor.base.OBSERVABLE_CLASS_NAME
+import com.github.rougsig.mvifake.processor.base.PUBLISH_RELAY_CLASS_NAME
+import com.github.rougsig.mvifake.processor.base.RELAY_CLASS_NAME
+import com.github.rougsig.mvifake.processor.extensions.beginWithUpperCase
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 

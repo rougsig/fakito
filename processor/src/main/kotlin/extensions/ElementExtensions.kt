@@ -1,4 +1,4 @@
-package com.github.rougsig.mvifake.processor
+package com.github.rougsig.mvifake.processor.extensions
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName

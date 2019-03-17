@@ -1,5 +1,6 @@
-package com.github.rougsig.mvifake.processor
+package com.github.rougsig.mvifake.processor.viewgenerator
 
+import com.github.rougsig.mvifake.processor.extensions.javaToKotlinType
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asTypeName

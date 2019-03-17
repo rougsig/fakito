@@ -1,5 +1,8 @@
 package com.github.rougsig.mvifake.processor
 
+import com.github.rougsig.mvifake.processor.base.Generator
+import com.github.rougsig.mvifake.processor.viewgenerator.FakeViewType
+import com.github.rougsig.mvifake.processor.viewgenerator.fakeViewGenerator
 import com.github.rougsig.mvifake.runtime.FakeView
 import com.google.auto.service.AutoService
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
