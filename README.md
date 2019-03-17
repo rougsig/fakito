@@ -1,2 +1,2 @@
 # mvi-fake
-MVI fake generator
+A simple annotation processor for generating mvi fakes
