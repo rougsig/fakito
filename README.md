@@ -1,2 +1,2 @@
-# mvi-auto-mock
-MVI Intent source mock generator
+# mvi-fake
+MVI fake generator
