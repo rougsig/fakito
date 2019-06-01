@@ -1,10 +1,6 @@
 package com.github.rougsig.mvifake.processor.fakestateprops
 
 import com.github.rougsig.mvifake.processor.base.*
-import com.github.rougsig.mvifake.processor.base.Generator
-import com.github.rougsig.mvifake.processor.base.PUBLISH_RELAY_CLASS_NAME
-import com.github.rougsig.mvifake.processor.base.UNIT_CLASS_NAME
-import com.github.rougsig.mvifake.processor.base.createParameterizedObservableType
 import com.github.rougsig.mvifake.processor.extensions.beginWithUpperCase
 import com.squareup.kotlinpoet.*
 

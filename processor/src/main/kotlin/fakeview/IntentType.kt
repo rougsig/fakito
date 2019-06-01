@@ -2,7 +2,6 @@ package com.github.rougsig.mvifake.processor.fakeview
 
 import com.github.rougsig.mvifake.processor.base.OBSERVABLE_CLASS_NAME
 import com.github.rougsig.mvifake.processor.extensions.javaToKotlinType
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asTypeName
 import me.eugeniomarletti.kotlin.processing.KotlinProcessingEnvironment
