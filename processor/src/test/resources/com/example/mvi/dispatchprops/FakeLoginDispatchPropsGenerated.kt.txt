@@ -1,0 +1,26 @@
+package com.example.mvi.dispatchprops
+
+import com.example.mvi.entities.FormFieldValues
+import java.util.LinkedList
+import kotlin.collections.List
+
+abstract class FakeLoginDispatchPropsGenerated : LoginDispatchProps {
+    private val _methodCalls: LinkedList<Method> = LinkedList<Method>()
+
+    val methodCalls: List<Method>
+        get() = _methodCalls
+
+    override fun startLogin(arg0: FormFieldValues) {
+        _methodCalls.add(Method.StartLogin(arg0))
+    }
+
+    override fun callToSupport() {
+        _methodCalls.add(Method.CallToSupport)
+    }
+
+    sealed class Method {
+        data class StartLogin(arg0: FormFieldValues) : Method()
+
+        object CallToSupport : Method()
+    }
+}
