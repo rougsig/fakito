@@ -5,5 +5,5 @@ import kotlin.reflect.KClass
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
 annotation class FakeDispatchProps(
-  val fispatchPropsClass: KClass<*>
+  val dispatchPropsClass: KClass<*>
 )

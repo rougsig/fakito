@@ -1,6 +1,8 @@
 package com.github.rougsig.mvifake.processor
 
 import com.github.rougsig.mvifake.processor.base.Generator
+import com.github.rougsig.mvifake.processor.fakedispatchprops.FakeDispatchPropsType
+import com.github.rougsig.mvifake.processor.fakedispatchprops.fakeDispatchPropsGenerator
 import com.github.rougsig.mvifake.processor.fakestateprops.FakeStatePropsType
 import com.github.rougsig.mvifake.processor.fakestateprops.fakeStatePropsGenerator
 import com.github.rougsig.mvifake.processor.fakeview.FakeViewType
@@ -37,6 +39,7 @@ class MviFakeProcessor : KotlinAbstractProcessor() {
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
     processFakeViewAnnotations(annotations, roundEnv)
     processFakeStatePropsAnnotations(annotations, roundEnv)
+    processFakeDispatchPropsAnnotations(annotations, roundEnv)
     return true
   }
 
@@ -51,8 +54,16 @@ class MviFakeProcessor : KotlinAbstractProcessor() {
   private fun processFakeStatePropsAnnotations(annotations: Set<TypeElement>, roundEnv: RoundEnvironment) {
     for (type in roundEnv.getElementsAnnotatedWith(fakeStatePropsAnnotation)) {
       val targetElement = type as? TypeElement ?: continue
-      val fakeViewType = FakeStatePropsType.get(this, targetElement) ?: continue
-      fakeStatePropsGenerator.generateAndWrite(fakeViewType)
+      val fakeStatePropsType = FakeStatePropsType.get(this, targetElement) ?: continue
+      fakeStatePropsGenerator.generateAndWrite(fakeStatePropsType)
+    }
+  }
+
+  private fun processFakeDispatchPropsAnnotations(annotations: Set<TypeElement>, roundEnv: RoundEnvironment) {
+    for (type in roundEnv.getElementsAnnotatedWith(fakeDispatchPropsAnnotation)) {
+      val targetElement = type as? TypeElement ?: continue
+      val fakeDispatchPropsType = FakeDispatchPropsType.get(this, targetElement) ?: continue
+      fakeDispatchPropsGenerator.generateAndWrite(fakeDispatchPropsType)
     }
   }
 

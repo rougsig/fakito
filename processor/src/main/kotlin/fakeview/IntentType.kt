@@ -1,5 +1,6 @@
 package com.github.rougsig.mvifake.processor.fakeview
 
+import com.github.rougsig.mvifake.processor.base.OBSERVABLE_CLASS_NAME
 import com.github.rougsig.mvifake.processor.extensions.javaToKotlinType
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
@@ -15,14 +16,12 @@ internal class IntentType(
   val valueType: TypeName
 ) {
   companion object {
-    private val rxObservableClassName = ClassName.bestGuess("io.reactivex.Observable")
-
     fun get(env: KotlinProcessingEnvironment, element: Element): IntentType? {
       val method = element as? ExecutableElement ?: return null
       val returnType = method.returnType as? DeclaredType ?: return null
 
       val returnTypeQualifiedName = (returnType.asElement() as TypeElement).qualifiedName
-      val isReturnTypeRxObservable = returnTypeQualifiedName.toString() == rxObservableClassName.canonicalName
+      val isReturnTypeRxObservable = returnTypeQualifiedName.toString() == OBSERVABLE_CLASS_NAME.canonicalName
 
       if (!isReturnTypeRxObservable) return null
       val intentName = method.simpleName.toString()

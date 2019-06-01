@@ -1,28 +1,14 @@
 package com.github.rougsig.mvifake.processor.fakeview
 
+import com.github.rougsig.mvifake.processor.base.*
 import com.github.rougsig.mvifake.processor.base.Generator
-import com.github.rougsig.mvifake.processor.base.OBSERVABLE_CLASS_NAME
 import com.github.rougsig.mvifake.processor.base.PUBLISH_RELAY_CLASS_NAME
-import com.github.rougsig.mvifake.processor.base.RELAY_CLASS_NAME
 import com.github.rougsig.mvifake.processor.extensions.beginWithUpperCase
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 internal val fakeViewGenerator: FakeViewGenerator = FakeViewGenerator()
 
 internal class FakeViewGenerator : Generator<FakeViewType> {
-
-  private val unitTypeName = Unit::class.asTypeName()
-  private val createDefaultRelayFunName = "createDefaultRelay"
-
-  private fun createParameterizedRelayType(type: TypeName): TypeName {
-    return RELAY_CLASS_NAME.parameterizedBy(type)
-  }
-
-  private fun createParameterizedObservableType(type: TypeName): TypeName {
-    return OBSERVABLE_CLASS_NAME.parameterizedBy(type)
-  }
-
   override fun generateFile(type: FakeViewType): FileSpec {
     val className = "${type.viewName}Generated"
 
@@ -43,7 +29,7 @@ internal class FakeViewGenerator : Generator<FakeViewType> {
 
   private fun TypeSpec.Builder.addCreateDefaultRelayFun() = apply {
     addFunction(FunSpec
-      .builder(createDefaultRelayFunName)
+      .builder(CREATE_DEFAULT_RELAY_FUN_NAME)
       .addModifiers(KModifier.PROTECTED, KModifier.OPEN)
       .addTypeVariable(TypeVariableName("T"))
       .returns(createParameterizedRelayType(TypeVariableName("T")))
@@ -56,7 +42,7 @@ internal class FakeViewGenerator : Generator<FakeViewType> {
       PropertySpec
         .builder(intent.intentName, createParameterizedRelayType(intent.valueType))
         .addModifiers(KModifier.PROTECTED, KModifier.OPEN)
-        .delegate("lazy { %L<%T>() }", createDefaultRelayFunName, intent.valueType)
+        .delegate("lazy { %L<%T>() }", CREATE_DEFAULT_RELAY_FUN_NAME, intent.valueType)
         .build()
     })
   }
@@ -66,11 +52,11 @@ internal class FakeViewGenerator : Generator<FakeViewType> {
       FunSpec
         .builder("send${intent.intentName.beginWithUpperCase()}")
         .apply {
-          if (intent.valueType.toString() != unitTypeName.toString()) {
+          if (intent.valueType.toString() != UNIT_CLASS_NAME.toString()) {
             addParameter("value", intent.valueType)
             addStatement("%L.accept(value)", intent.intentName)
           } else {
-            addStatement("%L.accept(%T)", intent.intentName, unitTypeName)
+            addStatement("%L.accept(%T)", intent.intentName, UNIT_CLASS_NAME)
           }
         }
         .build()
@@ -88,3 +74,5 @@ internal class FakeViewGenerator : Generator<FakeViewType> {
     })
   }
 }
+
+private const val CREATE_DEFAULT_RELAY_FUN_NAME = "createDefaultRelay"
