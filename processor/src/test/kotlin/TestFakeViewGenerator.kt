@@ -1,6 +1,6 @@
 package com.github.rougsig.mvifake.processor
 
-class TestFakeViewGenerator : APTest("com.example.mvi") {
+class TestFakeViewGenerator : APTest("com.example.mvi.view") {
   fun testLoginView() {
     testProcessor(AnnotationProcessor(
       sourceFiles = listOf("FakeLoginView.java"),

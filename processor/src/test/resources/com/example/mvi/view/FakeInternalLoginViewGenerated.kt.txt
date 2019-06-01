@@ -1,4 +1,4 @@
-package com.example.mvi
+package com.example.mvi.view
 
 import com.example.mvi.entities.FormFieldValues
 import com.jakewharton.rxrelay2.PublishRelay
@@ -7,7 +7,7 @@ import io.reactivex.Observable
 import kotlin.CharSequence
 import kotlin.Unit
 
-abstract class FakeLoginViewGenerated : LoginView {
+internal abstract class FakeInternalLoginViewGenerated : InternalLoginView {
     protected open val navigateBackIntent: Relay<Unit> by lazy { createDefaultRelay<Unit>() }
 
     protected open val callSupportIntent: Relay<Unit> by lazy { createDefaultRelay<Unit>() }

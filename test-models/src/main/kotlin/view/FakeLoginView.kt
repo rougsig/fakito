@@ -1,4 +1,4 @@
-package com.example.mvi
+package com.example.mvi.view
 
 import com.github.rougsig.mvifake.runtime.FakeView
 

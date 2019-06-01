@@ -1,4 +1,4 @@
-package com.github.rougsig.mvifake.processor.viewgenerator
+package com.github.rougsig.mvifake.processor.fakestateprops
 
 import com.github.rougsig.mvifake.processor.base.Generator
 import com.github.rougsig.mvifake.processor.base.OBSERVABLE_CLASS_NAME
@@ -8,9 +8,9 @@ import com.github.rougsig.mvifake.processor.extensions.beginWithUpperCase
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
-internal val fakeViewGenerator: FakeViewGenerator = FakeViewGenerator()
+internal val fakeStatePropsGenerator: FakeStatePropsGenerator = FakeStatePropsGenerator()
 
-internal class FakeViewGenerator : Generator<FakeViewType> {
+internal class FakeStatePropsGenerator : Generator<FakeStatePropsType> {
 
   private val unitTypeName = Unit::class.asTypeName()
   private val createDefaultRelayFunName = "createDefaultRelay"
@@ -23,7 +23,7 @@ internal class FakeViewGenerator : Generator<FakeViewType> {
     return OBSERVABLE_CLASS_NAME.parameterizedBy(type)
   }
 
-  override fun generateFile(type: FakeViewType): FileSpec {
+  override fun generateFile(type: FakeStatePropsType): FileSpec {
     val className = "${type.viewName}Generated"
 
     return FileSpec
@@ -34,9 +34,9 @@ internal class FakeViewGenerator : Generator<FakeViewType> {
         .addModifiers(KModifier.ABSTRACT)
         .addSuperinterface(type.viewElement.asClassName())
         .addCreateDefaultRelayFun()
-        .addRelayProperties(type.intents)
-        .addSendIntentFunctions(type.intents)
-        .addGetIntentObservableFunctions(type.intents)
+        .addRelayProperties(type.stateProps)
+        .addSendIntentFunctions(type.stateProps)
+        .addGetIntentObservableFunctions(type.stateProps)
         .build())
       .build()
   }
@@ -51,8 +51,8 @@ internal class FakeViewGenerator : Generator<FakeViewType> {
       .build())
   }
 
-  private fun TypeSpec.Builder.addRelayProperties(intents: List<IntentType>) = apply {
-    addProperties(intents.map { intent ->
+  private fun TypeSpec.Builder.addRelayProperties(stateProps: List<StatePropType>) = apply {
+    addProperties(stateProps.map { intent ->
       PropertySpec
         .builder(intent.intentName, createParameterizedRelayType(intent.valueType))
         .addModifiers(KModifier.PROTECTED, KModifier.OPEN)
@@ -61,8 +61,8 @@ internal class FakeViewGenerator : Generator<FakeViewType> {
     })
   }
 
-  private fun TypeSpec.Builder.addSendIntentFunctions(intents: List<IntentType>) = apply {
-    addFunctions(intents.map { intent ->
+  private fun TypeSpec.Builder.addSendIntentFunctions(stateProps: List<StatePropType>) = apply {
+    addFunctions(stateProps.map { intent ->
       FunSpec
         .builder("send${intent.intentName.beginWithUpperCase()}")
         .apply {
@@ -77,8 +77,8 @@ internal class FakeViewGenerator : Generator<FakeViewType> {
     })
   }
 
-  private fun TypeSpec.Builder.addGetIntentObservableFunctions(intents: List<IntentType>) = apply {
-    addFunctions(intents.map { intent ->
+  private fun TypeSpec.Builder.addGetIntentObservableFunctions(stateProps: List<StatePropType>) = apply {
+    addFunctions(stateProps.map { intent ->
       FunSpec
         .builder(intent.intentName)
         .addModifiers(KModifier.OVERRIDE)

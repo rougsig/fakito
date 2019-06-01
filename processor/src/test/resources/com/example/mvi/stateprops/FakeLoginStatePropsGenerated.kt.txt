@@ -1,0 +1,28 @@
+package com.example.mvi.stateprops
+
+import com.example.mvi.entities.LceState
+import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay2.Relay
+import io.reactivex.Observable
+import kotlin.Unit
+
+abstract class FakeLoginStatePropsGenerated : LoginStateProps {
+    protected open val loginState: Relay<LceState<Unit>> by lazy {
+            createDefaultRelay<LceState<Unit>>() }
+
+    protected open val login: Relay<Unit> by lazy { createDefaultRelay<Unit>() }
+
+    protected open fun <T> createDefaultRelay(): Relay<T> = PublishRelay.create<T>()
+
+    fun sendLoginState(value: LceState<Unit>) {
+        loginState.accept(value)
+    }
+
+    fun sendLogin() {
+        login.accept(Unit)
+    }
+
+    override fun loginState(): Observable<LceState<Unit>> = loginState
+
+    override fun login(): Observable<Unit> = login
+}
