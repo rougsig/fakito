@@ -4,6 +4,7 @@ import com.github.rougsig.mvifake.processor.extensions.*
 import com.github.rougsig.mvifake.runtime.FakeDispatchProps
 import me.eugeniomarletti.kotlin.processing.KotlinProcessingEnvironment
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeMirror
 
 internal data class FakeDispatchPropsType(

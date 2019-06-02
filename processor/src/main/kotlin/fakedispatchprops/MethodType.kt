@@ -2,6 +2,7 @@ package com.github.rougsig.mvifake.processor.fakedispatchprops
 
 import com.github.rougsig.mvifake.processor.base.UNIT_CLASS_NAME
 import com.github.rougsig.mvifake.processor.extensions.beginWithUpperCase
+import com.github.rougsig.mvifake.processor.extensions.javaToKotlinType
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asTypeName
 import me.eugeniomarletti.kotlin.processing.KotlinProcessingEnvironment
@@ -11,8 +12,8 @@ import javax.lang.model.element.VariableElement
 
 internal data class MethodType(
   val methodName: String,
-  val methodElement: ExecutableElement,
-  val params: List<VariableElement>
+  val methodDataClassName: String,
+  val params: List<Param>
 ) {
   data class Param(val name: String, val type: TypeName)
 
@@ -24,12 +25,18 @@ internal data class MethodType(
       val isReturnTypeUnit = returnType.toString() == UNIT_CLASS_NAME.canonicalName
 
       if (!isReturnTypeUnit) return null
-      val methodName = method.simpleName.toString().beginWithUpperCase()
+      val methodName = method.simpleName.toString()
+      val params = method.parameters.map { param ->
+        Param(
+          param.simpleName.toString(),
+          param.asType().asTypeName().javaToKotlinType()
+        )
+      }
 
       return MethodType(
         methodName,
-        method,
-        method.parameters
+        methodName.beginWithUpperCase(),
+        params
       )
     }
   }

@@ -2,6 +2,7 @@ package com.example.mvi.dispatchprops
 
 import com.example.mvi.entities.FormFieldValues
 import java.util.LinkedList
+import kotlin.String
 import kotlin.collections.List
 
 abstract class FakeLoginDispatchPropsGenerated : LoginDispatchProps {
@@ -14,12 +15,18 @@ abstract class FakeLoginDispatchPropsGenerated : LoginDispatchProps {
         _methodCalls.add(Method.StartLogin(arg0))
     }
 
+    override fun startHelp(arg0: String) {
+        _methodCalls.add(Method.StartHelp(arg0))
+    }
+
     override fun callToSupport() {
         _methodCalls.add(Method.CallToSupport)
     }
 
     sealed class Method {
-        data class StartLogin(arg0: FormFieldValues) : Method()
+        data class StartLogin(val arg0: FormFieldValues) : Method()
+
+        data class StartHelp(val arg0: String) : Method()
 
         object CallToSupport : Method()
     }

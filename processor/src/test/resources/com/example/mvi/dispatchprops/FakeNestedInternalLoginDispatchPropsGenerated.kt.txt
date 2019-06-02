@@ -20,7 +20,7 @@ internal abstract class FakeNestedInternalLoginDispatchPropsGenerated :
     }
 
     sealed class Method {
-        data class StartLogin(arg0: FormFieldValues) : Method()
+        data class StartLogin(val arg0: FormFieldValues) : Method()
 
         object CallToSupport : Method()
     }

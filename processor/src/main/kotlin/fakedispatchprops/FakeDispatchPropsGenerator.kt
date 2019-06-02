@@ -48,17 +48,27 @@ internal class FakeDispatchPropsGenerator : Generator<FakeDispatchPropsType> {
       .addTypes(methods.map { method ->
         if (method.params.isEmpty()) {
           TypeSpec
-            .objectBuilder(method.methodName)
+            .objectBuilder(method.methodDataClassName)
             .superclass(methodClassType)
             .build()
         } else {
           TypeSpec
-            .classBuilder(method.methodName)
+            .classBuilder(method.methodDataClassName)
             .addModifiers(KModifier.DATA)
             .primaryConstructor(FunSpec
               .constructorBuilder()
-              .addParameters(method.params.map { ParameterSpec.get(it) })
+              .addParameters(method.params.map { param ->
+                ParameterSpec
+                  .builder(param.name, param.type)
+                  .build()
+              })
               .build())
+            .addProperties(method.params.map { param ->
+              PropertySpec
+                .builder(param.name, param.type)
+                .initializer(param.name)
+                .build()
+            })
             .superclass(methodClassType)
             .build()
         }
@@ -69,14 +79,20 @@ internal class FakeDispatchPropsGenerator : Generator<FakeDispatchPropsType> {
   private fun TypeSpec.Builder.addDispatchPropsMethodImplementation(methods: List<MethodType>) = apply {
     addFunctions(methods.map { method ->
       FunSpec
-        .overriding(method.methodElement)
+        .builder(method.methodName)
+        .addModifiers(KModifier.OVERRIDE)
+        .addParameters(method.params.map { param ->
+          ParameterSpec
+            .builder(param.name, param.type)
+            .build()
+        })
         .apply {
           if (method.params.isEmpty()) {
-            addStatement("_$METHOD_CALLS_LIST.add(%N.%N)", METHOD_SEALED_CLASS_NAME, method.methodName)
+            addStatement("_$METHOD_CALLS_LIST.add(%N.%N)", METHOD_SEALED_CLASS_NAME, method.methodDataClassName)
           } else {
-            addStatement("_$METHOD_CALLS_LIST.add(%N.%N(${method.params.joinToString { it.simpleName.toString() }}))",
+            addStatement("_$METHOD_CALLS_LIST.add(%N.%N(${method.params.joinToString { it.name }}))",
               METHOD_SEALED_CLASS_NAME,
-              method.methodName
+              method.methodDataClassName
             )
           }
         }

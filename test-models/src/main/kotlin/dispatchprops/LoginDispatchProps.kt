@@ -5,6 +5,8 @@ import com.example.mvi.entities.FormFieldValues
 interface LoginDispatchProps {
   fun startLogin(credentials: FormFieldValues)
 
+  fun startHelp(message: String)
+
   fun callToSupport()
 }
 
