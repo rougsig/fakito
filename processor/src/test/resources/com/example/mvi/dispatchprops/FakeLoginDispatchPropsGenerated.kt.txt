@@ -11,23 +11,23 @@ abstract class FakeLoginDispatchPropsGenerated : LoginDispatchProps {
     val methodCalls: List<Method>
         get() = _methodCalls
 
-    override fun startLogin(arg0: FormFieldValues) {
-        _methodCalls.add(Method.StartLogin(arg0))
-    }
-
-    override fun startHelp(arg0: String) {
-        _methodCalls.add(Method.StartHelp(arg0))
-    }
-
     override fun callToSupport() {
         _methodCalls.add(Method.CallToSupport)
     }
 
+    override fun startHelp(message: String) {
+        _methodCalls.add(Method.StartHelp(message))
+    }
+
+    override fun startLogin(credentials: FormFieldValues) {
+        _methodCalls.add(Method.StartLogin(credentials))
+    }
+
     sealed class Method {
-        data class StartLogin(val arg0: FormFieldValues) : Method()
-
-        data class StartHelp(val arg0: String) : Method()
-
         object CallToSupport : Method()
+
+        data class StartHelp(val message: String) : Method()
+
+        data class StartLogin(val credentials: FormFieldValues) : Method()
     }
 }

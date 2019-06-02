@@ -11,17 +11,17 @@ internal abstract class FakeNestedInternalLoginDispatchPropsGenerated :
     val methodCalls: List<Method>
         get() = _methodCalls
 
-    override fun startLogin(arg0: FormFieldValues) {
-        _methodCalls.add(Method.StartLogin(arg0))
-    }
-
     override fun callToSupport() {
         _methodCalls.add(Method.CallToSupport)
     }
 
-    sealed class Method {
-        data class StartLogin(val arg0: FormFieldValues) : Method()
+    override fun startLogin(credentials: FormFieldValues) {
+        _methodCalls.add(Method.StartLogin(credentials))
+    }
 
+    sealed class Method {
         object CallToSupport : Method()
+
+        data class StartLogin(val credentials: FormFieldValues) : Method()
     }
 }
