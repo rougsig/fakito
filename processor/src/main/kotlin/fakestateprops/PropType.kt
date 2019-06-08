@@ -23,6 +23,8 @@ internal class PropType(
       val isReturnTypeRxObservable = returnTypeQualifiedName.toString() == OBSERVABLE_CLASS_NAME.canonicalName
 
       if (!isReturnTypeRxObservable) return null
+      if (method.parameters.isNotEmpty()) return null
+
       val intentName = method.simpleName.toString()
       val valueType = returnType.typeArguments.first().asTypeName()
 

@@ -24,4 +24,12 @@ class TestFakeStatePropsGenerator : APTest("com.example.mvi.stateprops") {
       processor = MviFakeProcessor()
     ))
   }
+
+  fun testProfileStateProps() {
+    testProcessor(AnnotationProcessor(
+      sourceFiles = listOf("FakeProfileStateProps.java"),
+      destinationFile = "FakeProfileStatePropsGenerated.kt.txt",
+      processor = MviFakeProcessor()
+    ))
+  }
 }

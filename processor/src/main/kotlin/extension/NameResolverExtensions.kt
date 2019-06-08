@@ -1,0 +1,8 @@
+package com.github.rougsig.mvifake.processor.extension
+
+import com.squareup.kotlinpoet.ClassName
+import me.eugeniomarletti.kotlin.metadata.shadow.metadata.deserialization.NameResolver
+
+fun NameResolver.getClassName(index: Int): ClassName {
+  return ClassName.bestGuess(getQualifiedClassName(index).replace("/", "."))
+}
