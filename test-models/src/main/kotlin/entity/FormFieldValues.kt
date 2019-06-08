@@ -1,4 +1,4 @@
-package com.example.mvi.entities
+package com.example.mvi.entity
 
 data class FormFieldValues(
   val phone: String,

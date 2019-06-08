@@ -1,6 +1,6 @@
 package com.example.mvi.dispatchprops
 
-import com.example.mvi.entities.FormFieldValues
+import com.example.mvi.entity.FormFieldValues
 import java.util.LinkedList
 import kotlin.String
 import kotlin.collections.List

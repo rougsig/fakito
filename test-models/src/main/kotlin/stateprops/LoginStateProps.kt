@@ -1,6 +1,6 @@
 package com.example.mvi.stateprops
 
-import com.example.mvi.entities.LceState
+import com.example.mvi.entity.LceState
 import io.reactivex.Observable
 
 interface LoginStateProps {

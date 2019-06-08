@@ -1,6 +1,6 @@
 package com.example.mvi.stateprops
 
-import com.example.mvi.entities.LceState
+import com.example.mvi.entity.LceState
 import com.jakewharton.rxrelay2.PublishRelay
 import com.jakewharton.rxrelay2.Relay
 import io.reactivex.Observable

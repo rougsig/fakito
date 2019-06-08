@@ -1,4 +1,4 @@
-package com.example.mvi.entities
+package com.example.mvi.entity
 
 data class LceState<T>(
   val content: T?,

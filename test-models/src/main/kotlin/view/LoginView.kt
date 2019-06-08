@@ -1,6 +1,6 @@
 package com.example.mvi.view
 
-import com.example.mvi.entities.FormFieldValues
+import com.example.mvi.entity.FormFieldValues
 import io.reactivex.Observable
 
 interface LoginView : MviView<FormFieldValues> {

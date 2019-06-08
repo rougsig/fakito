@@ -1,7 +1,7 @@
 package com.example.mvi.stateprops
 
-import com.example.mvi.entities.CardDetails
-import com.example.mvi.entities.LceState
+import com.example.mvi.entity.CardDetails
+import com.example.mvi.entity.LceState
 import com.github.rougsig.mvifake.runtime.FakeStateProps
 import io.reactivex.Observable
 

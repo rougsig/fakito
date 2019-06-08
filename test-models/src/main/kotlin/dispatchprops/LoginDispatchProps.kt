@@ -1,6 +1,6 @@
 package com.example.mvi.dispatchprops
 
-import com.example.mvi.entities.FormFieldValues
+import com.example.mvi.entity.FormFieldValues
 
 interface LoginDispatchProps {
   fun startLogin(credentials: FormFieldValues)

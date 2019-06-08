@@ -1,6 +1,6 @@
 package com.example.mvi.view
 
-import com.example.mvi.entities.FormFieldValues
+import com.example.mvi.entity.FormFieldValues
 import com.jakewharton.rxrelay2.PublishRelay
 import com.jakewharton.rxrelay2.Relay
 import io.reactivex.Observable
