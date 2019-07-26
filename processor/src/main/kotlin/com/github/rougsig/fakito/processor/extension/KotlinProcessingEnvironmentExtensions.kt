@@ -1,4 +1,4 @@
-package com.github.rougsig.mvifake.processor.extensions
+package com.github.rougsig.fakito.processor.extension
 
 import me.eugeniomarletti.kotlin.processing.KotlinProcessingEnvironment
 import javax.lang.model.element.Element

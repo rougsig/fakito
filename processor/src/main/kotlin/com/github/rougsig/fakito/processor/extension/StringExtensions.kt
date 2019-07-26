@@ -1,4 +1,4 @@
-package com.github.rougsig.mvifake.processor.extensions
+package com.github.rougsig.fakito.processor.extension
 
 fun String.beginWithUpperCase(): String {
   return when (length) {

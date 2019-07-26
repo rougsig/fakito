@@ -1,4 +1,4 @@
-package com.github.rougsig.mvifake.processor
+package com.github.rougsig.fakito.processor
 
 import com.google.common.collect.ImmutableList
 import com.google.common.io.Files

@@ -1,4 +1,4 @@
-package com.github.rougsig.mvifake.processor.extension
+package com.github.rougsig.fakito.processor.extension
 
 import com.squareup.kotlinpoet.ClassName
 import me.eugeniomarletti.kotlin.metadata.shadow.metadata.deserialization.NameResolver

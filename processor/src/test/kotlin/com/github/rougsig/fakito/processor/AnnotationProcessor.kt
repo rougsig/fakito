@@ -1,4 +1,4 @@
-package com.github.rougsig.mvifake.processor
+package com.github.rougsig.fakito.processor
 
 import javax.annotation.processing.Processor
 
