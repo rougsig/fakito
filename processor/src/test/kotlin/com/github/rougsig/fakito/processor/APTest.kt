@@ -7,43 +7,35 @@ import com.google.testing.compile.Compiler
 import com.google.testing.compile.JavaFileObjects
 import org.assertj.core.api.Assertions
 import java.io.File
-import java.nio.file.Path
+import java.nio.file.Paths
 import javax.annotation.processing.Processor
 
-abstract class APTest : Assertions() {
-
-  class MemoFile(
-    val name: String,
-    vararg val lines: String
-  )
-
-  fun testProcessor(
+abstract class APTest(
+  private val packageName: String
+) : Assertions() {
+  fun runProcessor(
     processor: Processor,
-    sourceJava: List<MemoFile>,
-    expectedKotlin: List<MemoFile>,
+    sources: List<String>,
     generationDir: File = Files.createTempDir()
-  ) {
+  ): File {
+    val projectRoot = File(".").absoluteFile.parent
+    val packageNameDir = packageName.replace(".", "/")
+    val stubs = Paths.get(projectRoot, TEST_MODELS_STUB_DIR, packageNameDir).toFile()
+
     val compilation = Compiler.javac()
       .withProcessors(processor)
       .withOptions(ImmutableList.of("-Akapt.kotlin.generated=$generationDir", "-proc:only"))
-      .compile(sourceJava.map { source ->
-        JavaFileObjects.forSourceLines(source.name, source.lines.map(String::trimIndent))
+      .compile(sources.map {
+        val stub = File(stubs, it.replace(".", "/") + ".java").toURI().toURL()
+        JavaFileObjects.forResource(stub)
       })
 
     CompilationSubject
       .assertThat(compilation)
       .succeeded()
 
-    generationDir.mkdirs()
-
-    expectedKotlin.forEach { expected ->
-      val nameSegments = expected.name.split(".")
-      val pathSegments = nameSegments.dropLast(1)
-      val fileDirectory = pathSegments.fold(generationDir) { acc, path -> File(acc, path) }
-      val actualFile = File(fileDirectory, "${nameSegments.last()}.kt")
-
-      assertThat(actualFile.readText().trimIndent())
-        .isEqualTo(expected.lines.joinToString("\n").trimIndent())
-    }
+    return generationDir
   }
 }
+
+private const val TEST_MODELS_STUB_DIR = "processor/build/tmp/kapt3/stubs/test"

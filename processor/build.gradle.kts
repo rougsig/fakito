@@ -15,6 +15,7 @@ dependencies {
   implementation(deps.getValue("autoService"))
 
   kapt(deps.getValue("autoService"))
+  kaptTest(deps.getValue("autoService"))
 
   testImplementation(deps.getValue("compileTesting")) {
     exclude("junit:junit")
