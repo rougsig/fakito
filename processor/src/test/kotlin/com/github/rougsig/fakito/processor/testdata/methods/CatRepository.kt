@@ -13,7 +13,11 @@ interface CatRepository {
 
   fun deleteCats(catIds: Set<String>)
 
-  fun updateCat(catId: String, newName: Any, newHomes: List<String>)
+  fun updateCat(
+    catId: String,
+    newName: Any,
+    newHomes: List<String>
+  )
 }
 
 @Fakito(CatRepository::class)
