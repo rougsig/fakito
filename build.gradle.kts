@@ -53,7 +53,7 @@ subprojects {
   }
 
   tasks.withType<Test> {
-    useJUnitPlatform()
+    useTestNG()
     testLogging {
       exceptionFormat = TestExceptionFormat.FULL
     }
