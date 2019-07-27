@@ -1,4 +1,4 @@
-package com.github.rougsig.fakito.processor.core
+package com.github.rougsig.fakito.processor.generator
 
 import com.squareup.kotlinpoet.FileSpec
 

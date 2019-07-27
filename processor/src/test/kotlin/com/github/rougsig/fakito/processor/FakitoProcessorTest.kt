@@ -4,21 +4,50 @@ import org.testng.annotations.Test
 
 internal class FakitoProcessorTest : APTest() {
   @Test
-  fun nothing() = testProcessor(
-    source = MemoFile(
-      name = "Main"
+  fun `source without methods should generate implementation without methods`() = testProcessor(
+    sourceJava = listOf(
+      MemoFile(
+        "com.github.rougsig.fakito.test.CatRepository",
+        """
+          package com.github.rougsig.fakito.test;
+  
+          public interface CatRepository {
+          }
+        """
+      ),
+      MemoFile(
+        "com.github.rougsig.fakito.test.CatRepositoryGenerated",
+        """
+          package com.github.rougsig.fakito.test;
+  
+          import com.github.rougsig.fakito.runtime.Fakito;
+          
+          @Fakito(CatRepository.class)
+          public class CatRepositoryGenerated {
+          }
+        """
+      )
     ),
-    expected = null
+    expectedKotlin = listOf(
+      MemoFile(
+        "com.github.rougsig.fakito.test.CatRepositoryGenerated",
+        """
+          package com.github.rougsig.fakito.test
+          
+          open class CatRepositoryGenerated
+        """
+      )
+    )
   )
 
   private fun testProcessor(
-    source: MemoFile,
-    expected: MemoFile?
+    sourceJava: List<MemoFile>,
+    expectedKotlin: List<MemoFile>
   ) {
     testProcessor(
       FakitoProcessor(),
-      source,
-      expected
+      sourceJava,
+      expectedKotlin
     )
   }
 }

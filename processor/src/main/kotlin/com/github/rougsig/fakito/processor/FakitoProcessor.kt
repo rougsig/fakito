@@ -1,7 +1,8 @@
 package com.github.rougsig.fakito.processor
 
+import com.github.rougsig.fakito.processor.generator.FakitoGenerator
 import com.github.rougsig.fakito.runtime.Fakito
-import com.github.rougsig.fakito.processor.core.Generator
+import com.github.rougsig.fakito.processor.generator.Generator
 import com.google.auto.service.AutoService
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
 import java.io.File
@@ -15,6 +16,10 @@ class FakitoProcessor : KotlinAbstractProcessor() {
   private val fakitoAnnotation = Fakito::class.java
 
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
+    FakitoGenerator.generateAndWrite(FakitoGenerator.Params(
+      packageName = "com.github.rougsig.fakito.test",
+      fileName = "CatRepositoryGenerated"
+    ))
     return true
   }
 

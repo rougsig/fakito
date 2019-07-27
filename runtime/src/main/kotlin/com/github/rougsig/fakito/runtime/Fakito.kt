@@ -5,5 +5,5 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
 annotation class  Fakito(
-  val target: KClass<*>
+  val value: KClass<*>
 )
