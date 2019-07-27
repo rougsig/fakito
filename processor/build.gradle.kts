@@ -16,7 +16,9 @@ dependencies {
 
   kapt(deps.getValue("autoService"))
 
-  testImplementation(deps.getValue("compileTesting"))
+  testImplementation(deps.getValue("compileTesting")) {
+    exclude("junit:junit")
+  }
 }
 
 apply("../gradle/gradle-mvn-push.gradle")

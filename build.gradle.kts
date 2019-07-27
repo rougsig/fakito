@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 var versions: Map<String, String> by extra
@@ -49,6 +50,13 @@ subprojects {
 
     testImplementation(deps.getValue("testng"))
     testImplementation(deps.getValue("assertjCore"))
+  }
+
+  tasks.withType<Test> {
+    useJUnitPlatform()
+    testLogging {
+      exceptionFormat = TestExceptionFormat.FULL
+    }
   }
 
   tasks.withType<KotlinCompile> {
