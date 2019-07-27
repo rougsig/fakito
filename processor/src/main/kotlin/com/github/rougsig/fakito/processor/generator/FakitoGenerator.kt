@@ -3,9 +3,11 @@ package com.github.rougsig.fakito.processor.generator
 import com.github.rougsig.fakito.processor.extension.*
 import com.github.rougsig.fakito.runtime.Fakito
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import me.eugeniomarletti.kotlin.metadata.KotlinClassMetadata
 import me.eugeniomarletti.kotlin.metadata.kotlinMetadata
 import me.eugeniomarletti.kotlin.processing.KotlinProcessingEnvironment
+import java.util.*
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
@@ -14,7 +16,8 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
   data class Params(
     val packageName: String,
     val fileName: String,
-    val methods: List<Method>
+    val methods: List<Method>,
+    val targetElement: TypeElement
   ) {
 
     data class Method(
@@ -59,7 +62,8 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
         return Params(
           packageName = className.packageName,
           fileName = "${className.simpleName}Generated",
-          methods = methods
+          methods = methods,
+          targetElement = fakitoTargetElement
         )
       }
 
@@ -75,11 +79,13 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
     return FileSpec.get(params.packageName,
       TypeSpec
         .classBuilder(params.fileName)
-        .addModifiers(KModifier.OPEN)
+        .addModifiers(KModifier.ABSTRACT)
+        .addSuperinterface(params.targetElement.asClassName())
         .addMethodClass(params.methods)
         .addReturnsBuilder(params.methods)
         .addReturnsImpl(params.methods)
         .addReturnsBuilderInitFun(params.methods)
+        .addImplFunctions(params.methods)
         .build()
     )
   }
@@ -92,6 +98,10 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
     val methodClassName = "Method"
 
     return this
+      .addProperty(PropertySpec
+        .builder("methodCalls", LinkedList::class.asTypeName().parameterizedBy(ClassName.bestGuess(methodClassName)))
+        .initializer("%T()", LinkedList::class.asTypeName())
+        .build())
       .addType(TypeSpec
         .classBuilder(methodClassName)
         .addModifiers(KModifier.SEALED)
@@ -175,7 +185,6 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
         .build())
   }
 
-
   private fun TypeSpec.Builder.addReturnsBuilder(
     methods: List<Params.Method>
   ): TypeSpec.Builder {
@@ -236,9 +245,9 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
               .apply {
                 methods.forEachIndexed { i, method ->
                   if (i == methods.lastIndex) {
-                    addStatement("${method.name}Impl = ${method.name}Impl")
+                    addStatement("${method.name}Impl")
                   } else {
-                    addStatement("${method.name}Impl = ${method.name}Impl,")
+                    addStatement("${method.name}Impl,")
                   }
                 }
               }
@@ -274,5 +283,44 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
         .addStatement("builder.init()")
         .addStatement("this.returnsImpl = builder.build()")
         .build())
+  }
+
+  private fun TypeSpec.Builder.addImplFunctions(
+    methods: List<Params.Method>
+  ): TypeSpec.Builder {
+    if (methods.isEmpty()) return this
+
+    return this
+      .addFunctions(methods.map { method ->
+        FunSpec
+          .builder(method.name)
+          .addModifiers(KModifier.OVERRIDE)
+          .addParameters(method.params.map { param ->
+            ParameterSpec
+              .builder(param.name, param.type)
+              .build()
+          })
+          .apply {
+            val params = method.params.joinToString(", ") { it.name }
+
+            if (method.params.isEmpty()) {
+              addStatement("this.methodCalls.add(Method.${method.name.beginWithUpperCase()})")
+            } else {
+              addStatement("this.methodCalls.add(Method.${method.name.beginWithUpperCase()}($params))")
+            }
+
+            if (method.type == Unit::class.asTypeName()) {
+              addStatement("returnsImpl?.${method.name}Impl?.invoke($params)")
+            } else {
+              addStatement("val classImpl = this.returnsImpl ?: error(%S)",
+                "returns not found for method ${method.name}($params)")
+              addStatement("val methodImpl = classImpl.${method.name}Impl ?: error(%S)",
+                "returns not found for method ${method.name}($params)")
+              addStatement("return methodImpl.invoke($params)")
+            }
+          }
+          .returns(method.type)
+          .build()
+      })
   }
 }

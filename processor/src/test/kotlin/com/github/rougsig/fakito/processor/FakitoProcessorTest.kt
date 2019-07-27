@@ -17,7 +17,7 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
         """
           package com.github.rougsig.fakito.processor.testdata.empty
           
-          open class CatRepositoryFakeGenerated
+          abstract class CatRepositoryFakeGenerated : CatRepository
         """.trimIndent()
       )
   }
@@ -115,12 +115,12 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
             }
             
             fun build(): ReturnsImpl = ReturnsImpl(
-              fetchCatsImpl = fetchCatsImpl,
-              fetchCatByIdImpl = fetchCatByIdImpl,
-              catsImpl = catsImpl,
-              catByIdImpl = catByIdImpl,
-              deleteCatsImpl = deleteCatsImpl,
-              updateCatImpl = updateCatImpl
+              fetchCatsImpl,
+              fetchCatByIdImpl,
+              catsImpl,
+              catByIdImpl,
+              deleteCatsImpl,
+              updateCatImpl
             )
           }
         """.trimIndent()
@@ -167,6 +167,57 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
             val builder = ReturnsBuilder()
             builder.init()
             this.returnsImpl = builder.build() 
+          }
+        """.trimIndent()
+      )
+  }
+
+  @Test
+  fun `generated file should implement target element functions`() {
+    val generatedFiles = runProcessor("methods.CatRepository", "methods.CatRepositoryFake")
+
+    assertThat(generatedFiles.size).isEqualTo(1)
+    val generatedFile = generatedFiles.first()
+    val implFunctions = (generatedFile.members.first() as TypeSpec).funSpecs.filterNot { it.name == "returns" }
+    assertThat(implFunctions.joinToString("\n\r"))
+      .isEqualToIgnoringWhitespace(
+        """
+          override fun fetchCats() {
+              this.methodCalls.add(Method.FetchCats)
+              returnsImpl?.fetchCatsImpl?.invoke()
+          }
+          
+          override fun fetchCatById(catId: kotlin.String) {
+              this.methodCalls.add(Method.FetchCatById(catId))
+              returnsImpl?.fetchCatByIdImpl?.invoke(catId)
+          }
+          
+          override fun cats(): kotlin.collections.List<kotlin.Any> {
+              this.methodCalls.add(Method.Cats)
+              val classImpl = this.returnsImpl ?: error("returns not found for method cats()")
+              val methodImpl = classImpl.catsImpl ?: error("returns not found for method cats()")
+              return methodImpl.invoke()
+          }
+          
+          override fun catById(catId: kotlin.String): kotlin.Any {
+              this.methodCalls.add(Method.CatById(catId))
+              val classImpl = this.returnsImpl ?: error("returns not found for method catById(catId)")
+              val methodImpl = classImpl.catByIdImpl ?: error("returns not found for method catById(catId)")
+              return methodImpl.invoke(catId)
+          }
+          
+          override fun deleteCats(catIds: kotlin.collections.Set<kotlin.String>) {
+              this.methodCalls.add(Method.DeleteCats(catIds))
+              returnsImpl?.deleteCatsImpl?.invoke(catIds)
+          }
+          
+          override fun updateCat(
+              catId: kotlin.String,
+              newName: kotlin.Any,
+              newHomes: kotlin.collections.List<kotlin.String>
+          ) {
+              this.methodCalls.add(Method.UpdateCat(catId, newName, newHomes))
+              returnsImpl?.updateCatImpl?.invoke(catId, newName, newHomes)
           }
         """.trimIndent()
       )
