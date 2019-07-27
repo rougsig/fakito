@@ -5,6 +5,7 @@ import com.google.common.io.Files
 import com.google.testing.compile.CompilationSubject
 import com.google.testing.compile.Compiler
 import com.google.testing.compile.JavaFileObjects
+import org.assertj.core.api.AbstractAssert
 import org.assertj.core.api.Assertions
 import java.io.File
 import java.nio.file.Paths

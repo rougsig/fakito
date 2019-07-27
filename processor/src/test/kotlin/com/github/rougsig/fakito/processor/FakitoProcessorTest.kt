@@ -2,7 +2,6 @@ package com.github.rougsig.fakito.processor
 
 import com.github.rougsig.fakito.processor.generator.FakitoGenerator
 import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.TypeSpec
 import org.testng.annotations.Test
 
@@ -13,14 +12,16 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
 
     assertThat(generatedFiles.size).isEqualTo(1)
     val generatedFile = generatedFiles.first()
-    assertThat(generatedFile)
-      .isEqualTo(FileSpec
-        .builder("com.github.rougsig.fakito.processor.testdata.empty", "CatRepositoryFakeGenerated")
-        .addType(TypeSpec
-          .classBuilder("CatRepositoryFakeGenerated")
-          .addModifiers(KModifier.OPEN)
-          .build())
-        .build())
+    assertThat(generatedFile.toString())
+      .isEqualToIgnoringWhitespace(
+        """
+          package com.github.rougsig.fakito.processor.testdata.empty
+          
+          open class CatRepositoryFakeGenerated {
+            sealed class Method
+          }
+        """
+      )
   }
 
   @Test
@@ -29,12 +30,29 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
 
     assertThat(generatedFiles.size).isEqualTo(1)
     val generatedFile = generatedFiles.first()
-    val methodSealedClass = generatedFile.members.find { it is TypeSpec && it.name == "Method" }
-    assertThat(methodSealedClass)
-      .isEqualTo(TypeSpec
-        .classBuilder("Method")
-        .addModifiers(KModifier.SEALED)
-        .build())
+    val methodSealedClass = (generatedFile.members.first() as TypeSpec).typeSpecs.find { it.name == "Method" }
+    assertThat(methodSealedClass.toString())
+      .isEqualToIgnoringWhitespace(
+        """
+          sealed class Method {
+            object FetchCats : Method()
+        
+            data class FetchCatById(val catId: kotlin.String) : Method()
+        
+            object Cats : Method()
+        
+            data class CatById(val catId: kotlin.String) : Method()
+        
+            data class DeleteCats(val catIds: kotlin.collections.Set<kotlin.String>) : Method()
+
+            data class UpdateCat(
+                val catId: kotlin.String,
+                val newName: kotlin.Any,
+                val newHomes: kotlin.collections.List<kotlin.String>
+            ) : Method()
+          }
+        """
+      )
   }
 
   private fun runProcessor(vararg sources: String): List<FileSpec> {
