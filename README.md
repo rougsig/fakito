@@ -56,6 +56,6 @@ sourceSets {
     test.java.srcDirs += 'src/test/kotlin'
 }
 
-implementation 'com.github.rougsig:mvi-fake-runtime:1.0.0'
-kapt 'com.github.rougsig:mvi-fake-processor:1.0.0'
+implementation 'com.github.rougsig:fakito-runtime:2.0.0'
+kapt 'com.github.rougsig:fakito-processor:2.0.0'
 ```

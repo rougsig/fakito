@@ -1,1 +1,2 @@
-include ':processor', ':runtime', ":test-models"
+rootProject.name = "fakito"
+include ":runtime", ":processor"

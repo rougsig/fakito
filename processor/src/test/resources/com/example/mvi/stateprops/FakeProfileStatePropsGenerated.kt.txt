@@ -1,8 +1,0 @@
-package com.example.mvi.stateprops
-
-import com.jakewharton.rxrelay2.PublishRelay
-import com.jakewharton.rxrelay2.Relay
-
-abstract class FakeProfileStatePropsGenerated : ProfileStateProps {
-    protected open fun <T> createDefaultRelay(): Relay<T> = PublishRelay.create<T>()
-}
