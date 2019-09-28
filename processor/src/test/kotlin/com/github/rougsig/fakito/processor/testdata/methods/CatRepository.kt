@@ -9,14 +9,14 @@ interface CatRepository {
 
   fun cats(): List<Any>
 
-  fun catById(catId: String): Any
+  fun catById(catId: String): Any?
 
   fun deleteCats(catIds: Set<String>)
 
   fun updateCat(
     catId: String,
-    newName: Any,
-    newHomes: List<String>
+    newName: Any?,
+    newHomes: List<String?>
   )
 }
 

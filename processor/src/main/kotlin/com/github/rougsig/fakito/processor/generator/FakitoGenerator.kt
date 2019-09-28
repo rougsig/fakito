@@ -1,73 +1,43 @@
 package com.github.rougsig.fakito.processor.generator
 
-import com.github.rougsig.fakito.processor.extension.*
+import com.github.rougsig.fakito.processor.extension.asTypeElement
+import com.github.rougsig.fakito.processor.extension.beginWithUpperCase
+import com.github.rougsig.fakito.processor.extension.getAnnotationMirror
+import com.github.rougsig.fakito.processor.extension.getFieldByName
 import com.github.rougsig.fakito.runtime.Fakito
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import me.eugeniomarletti.kotlin.metadata.KotlinClassMetadata
-import me.eugeniomarletti.kotlin.metadata.kotlinMetadata
-import me.eugeniomarletti.kotlin.processing.KotlinProcessingEnvironment
+import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
+import com.squareup.kotlinpoet.metadata.specs.toFileSpec
+import com.squareup.kotlinpoet.metadata.specs.toTypeSpec
 import java.util.*
-import javax.lang.model.element.ExecutableElement
+import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
 
 object FakitoGenerator : Generator<FakitoGenerator.Params> {
   data class Params(
-    val packageName: String,
-    val fileName: String,
-    val methods: List<Method>,
-    val targetElement: TypeElement
+    val fileSpec: FileSpec,
+    val typeSpec: TypeSpec,
+    val fakitoTarget: TypeElement,
+    val funSpecs: List<FunSpec>
   ) {
 
-    data class Method(
-      val name: String,
-      val type: TypeName,
-      val params: List<Param>
-    )
-
-    data class Param(
-      val name: String,
-      val type: TypeName
-    )
-
+    @KotlinPoetMetadataPreview
     companion object {
-      fun get(env: KotlinProcessingEnvironment, targetElement: TypeElement): Params {
-        val className = targetElement.className
-
-        val fakitoTargetElement = unwrapTarget(env, targetElement)
-
-        val metadata = (fakitoTargetElement.kotlinMetadata as? KotlinClassMetadata)!!.data
-        val nameResolver = metadata.nameResolver
-        val proto = metadata.classProto
-
-        val functionProtos = proto.functionList.map { nameResolver.getString(it.name) to it }.toMap()
-
-        val methods = fakitoTargetElement.enclosedElements
-          .mapNotNull { it as? ExecutableElement }
-          .map { it to functionProtos.getValue(it.simpleName.toString()) }
-          .map { (exec, func) ->
-            Method(
-              name = nameResolver.getString(func.name),
-              type = exec.returnType.asTypeName().javaToKotlinType(),
-              params = exec.parameters.mapIndexed { i, param ->
-                Param(
-                  name = nameResolver.getString(func.valueParameterList[i].name),
-                  type = param.asType().asTypeName().javaToKotlinType()
-                )
-              }
-            )
-          }
+      fun get(env: ProcessingEnvironment, targetElement: TypeElement): Params {
+        val fakitoTarget = unwrapTarget(env, targetElement)
+        val typeSpec = fakitoTarget.toTypeSpec()
 
         return Params(
-          packageName = className.packageName,
-          fileName = "${className.simpleName}Generated",
-          methods = methods,
-          targetElement = fakitoTargetElement
+          fileSpec = targetElement.toFileSpec(),
+          typeSpec = typeSpec,
+          fakitoTarget = fakitoTarget,
+          funSpecs = typeSpec.funSpecs
         )
       }
 
-      private fun unwrapTarget(env: KotlinProcessingEnvironment, targetElement: TypeElement): TypeElement {
+      private fun unwrapTarget(env: ProcessingEnvironment, targetElement: TypeElement): TypeElement {
         val annotation = targetElement.getAnnotationMirror(Fakito::class)
         val annotationMirror = annotation!!.getFieldByName("value")!!.value as TypeMirror
         return annotationMirror.asTypeElement(env)
@@ -76,24 +46,24 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
   }
 
   override fun generateFile(params: Params): FileSpec {
-    return FileSpec.get(params.packageName,
+    return FileSpec.get(params.fileSpec.packageName,
       TypeSpec
-        .classBuilder(params.fileName)
+        .classBuilder("${params.fileSpec.name}Generated")
         .addModifiers(KModifier.ABSTRACT)
-        .addSuperinterface(params.targetElement.asClassName())
-        .addMethodClass(params.methods)
-        .addReturnsBuilder(params.methods)
-        .addReturnsImpl(params.methods)
-        .addReturnsBuilderInitFun(params.methods)
-        .addImplFunctions(params.methods)
+        .addSuperinterface(params.fakitoTarget.asClassName())
+        .addMethodClass(params.funSpecs)
+        .addReturnsBuilder(params.funSpecs)
+        .addReturnsImpl(params.funSpecs)
+        .addReturnsBuilderInitFun(params.funSpecs)
+        .addImplFunctions(params.funSpecs)
         .build()
     )
   }
 
   private fun TypeSpec.Builder.addMethodClass(
-    methods: List<Params.Method>
+    funSpecs: List<FunSpec>
   ): TypeSpec.Builder {
-    if (methods.isEmpty()) return this
+    if (funSpecs.isEmpty()) return this
 
     val methodClassName = "Method"
 
@@ -106,26 +76,22 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
         .classBuilder(methodClassName)
         .addModifiers(KModifier.SEALED)
         .addTypes(
-          methods
-            .map { method ->
-              if (method.params.isEmpty()) {
+          funSpecs
+            .map { funSpec ->
+              if (funSpec.parameters.isEmpty()) {
                 TypeSpec
-                  .objectBuilder(method.name.beginWithUpperCase())
+                  .objectBuilder(funSpec.name.beginWithUpperCase())
                   .superclass(ClassName.bestGuess(methodClassName))
                   .build()
               } else {
                 TypeSpec
-                  .classBuilder(method.name.beginWithUpperCase())
+                  .classBuilder(funSpec.name.beginWithUpperCase())
                   .addModifiers(KModifier.DATA)
                   .primaryConstructor(FunSpec
                     .constructorBuilder()
-                    .addParameters(method.params.map { param ->
-                      ParameterSpec
-                        .builder(param.name, param.type)
-                        .build()
-                    })
+                    .addParameters(funSpec.parameters)
                     .build())
-                  .addProperties(method.params.map { param ->
+                  .addProperties(funSpec.parameters.map { param ->
                     PropertySpec
                       .builder(param.name, param.type)
                       .initializer(param.name)
@@ -140,9 +106,9 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
   }
 
   private fun TypeSpec.Builder.addReturnsImpl(
-    methods: List<Params.Method>
+    funSpecs: List<FunSpec>
   ): TypeSpec.Builder {
-    if (methods.isEmpty()) return this
+    if (funSpecs.isEmpty()) return this
 
     val returnsImplClassName = "ReturnsImpl"
 
@@ -152,59 +118,47 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
         .addModifiers(KModifier.DATA)
         .primaryConstructor(FunSpec
           .constructorBuilder()
-          .addParameters(methods.map { method ->
+          .addParameters(funSpecs.map { funSpec ->
             ParameterSpec
-              .builder("${method.name}Impl", LambdaTypeName
+              .builder("${funSpec.name}Impl", LambdaTypeName
                 .get(
-                  parameters = method.params.map { param ->
-                    ParameterSpec
-                      .builder(param.name, param.type)
-                      .build()
-                  },
-                  returnType = method.type
+                  parameters = funSpec.parameters,
+                  returnType = funSpec.returnType ?: Unit::class.asTypeName()
                 )
                 .copy(nullable = true))
               .build()
           })
           .build())
-        .addProperties(methods.map { method ->
+        .addProperties(funSpecs.map { funSpec ->
           PropertySpec
-            .builder("${method.name}Impl", LambdaTypeName
+            .builder("${funSpec.name}Impl", LambdaTypeName
               .get(
-                parameters = method.params.map { param ->
-                  ParameterSpec
-                    .builder(param.name, param.type)
-                    .build()
-                },
-                returnType = method.type
+                parameters = funSpec.parameters,
+                returnType = funSpec.returnType ?: Unit::class.asTypeName()
               )
               .copy(nullable = true))
-            .initializer("${method.name}Impl")
+            .initializer("${funSpec.name}Impl")
             .build()
         })
         .build())
   }
 
   private fun TypeSpec.Builder.addReturnsBuilder(
-    methods: List<Params.Method>
+    funSpecs: List<FunSpec>
   ): TypeSpec.Builder {
-    if (methods.isEmpty()) return this
+    if (funSpecs.isEmpty()) return this
 
     val returnsBuilderClassName = "ReturnsBuilder"
 
     return this
       .addType(TypeSpec
         .classBuilder(returnsBuilderClassName)
-        .addProperties(methods.map { method ->
+        .addProperties(funSpecs.map { funSpec ->
           PropertySpec
-            .builder("${method.name}Impl", LambdaTypeName
+            .builder("${funSpec.name}Impl", LambdaTypeName
               .get(
-                parameters = method.params.map { param ->
-                  ParameterSpec
-                    .builder(param.name, param.type)
-                    .build()
-                },
-                returnType = method.type
+                parameters = funSpec.parameters,
+                returnType = funSpec.returnType ?: Unit::class.asTypeName()
               )
               .copy(nullable = true))
             .addModifiers(KModifier.PRIVATE)
@@ -212,23 +166,19 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
             .initializer("null")
             .build()
         })
-        .addFunctions(methods.map { method ->
+        .addFunctions(funSpecs.map { funSpec ->
           val implParamName = "impl"
 
           FunSpec
-            .builder(method.name)
+            .builder(funSpec.name)
             .addParameter(ParameterSpec
               .builder(implParamName, LambdaTypeName
                 .get(
-                  parameters = method.params.map { param ->
-                    ParameterSpec
-                      .builder(param.name, param.type)
-                      .build()
-                  },
-                  returnType = method.type
+                  parameters = funSpec.parameters,
+                  returnType = funSpec.returnType ?: Unit::class.asTypeName()
                 ))
               .build())
-            .addStatement("this.${method.name}Impl = $implParamName")
+            .addStatement("this.${funSpec.name}Impl = $implParamName")
             .addStatement("return this")
             .returns(ClassName.bestGuess(returnsBuilderClassName))
             .build()
@@ -243,11 +193,11 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
               .builder()
               .addStatement("ReturnsImpl(")
               .apply {
-                methods.forEachIndexed { i, method ->
-                  if (i == methods.lastIndex) {
-                    addStatement("${method.name}Impl")
+                funSpecs.forEachIndexed { i, funSpec ->
+                  if (i == funSpecs.lastIndex) {
+                    addStatement("${funSpec.name}Impl")
                   } else {
-                    addStatement("${method.name}Impl,")
+                    addStatement("${funSpec.name}Impl,")
                   }
                 }
               }
@@ -259,9 +209,9 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
   }
 
   private fun TypeSpec.Builder.addReturnsBuilderInitFun(
-    methods: List<Params.Method>
+    funSpecs: List<FunSpec>
   ): TypeSpec.Builder {
-    if (methods.isEmpty()) return this
+    if (funSpecs.isEmpty()) return this
 
     return this
       .addProperty(PropertySpec
@@ -286,30 +236,26 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
   }
 
   private fun TypeSpec.Builder.addImplFunctions(
-    methods: List<Params.Method>
+    funSpecs: List<FunSpec>
   ): TypeSpec.Builder {
-    if (methods.isEmpty()) return this
+    if (funSpecs.isEmpty()) return this
 
     return this
-      .addFunctions(methods.map { method ->
+      .addFunctions(funSpecs.map { method ->
         FunSpec
           .builder(method.name)
           .addModifiers(KModifier.OVERRIDE)
-          .addParameters(method.params.map { param ->
-            ParameterSpec
-              .builder(param.name, param.type)
-              .build()
-          })
+          .addParameters(method.parameters)
           .apply {
-            val params = method.params.joinToString(", ") { it.name }
+            val params = method.parameters.joinToString(", ") { it.name }
 
-            if (method.params.isEmpty()) {
+            if (method.parameters.isEmpty()) {
               addStatement("this.methodCalls.add(Method.${method.name.beginWithUpperCase()})")
             } else {
               addStatement("this.methodCalls.add(Method.${method.name.beginWithUpperCase()}($params))")
             }
 
-            if (method.type == Unit::class.asTypeName()) {
+            if (method.returnType == null) {
               addStatement("returnsImpl?.${method.name}Impl?.invoke($params)")
             } else {
               addStatement("val classImpl = this.returnsImpl ?: error(%S)",
@@ -319,7 +265,7 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
               addStatement("return methodImpl.invoke($params)")
             }
           }
-          .returns(method.type)
+          .returns(method.returnType ?: Unit::class.asTypeName())
           .build()
       })
   }

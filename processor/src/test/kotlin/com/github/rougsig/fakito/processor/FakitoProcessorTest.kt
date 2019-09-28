@@ -15,10 +15,10 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
     assertThat(generatedFile.toString())
       .isEqualToIgnoringWhitespace(
         """
-          package com.github.rougsig.fakito.processor.testdata.empty
-          
-          abstract class CatRepositoryFakeGenerated : CatRepository
-        """.trimIndent()
+          |package com.github.rougsig.fakito.processor.testdata.empty
+          |
+          |abstract class CatRepositoryFakeGenerated : CatRepository
+        """.trimMargin()
       )
   }
 
@@ -32,24 +32,30 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
     assertThat(methodClass.toString())
       .isEqualToIgnoringWhitespace(
         """
-          sealed class Method {
-            object FetchCats : Method()
-        
-            data class FetchCatById(val catId: kotlin.String) : Method()
-        
-            object Cats : Method()
-        
-            data class CatById(val catId: kotlin.String) : Method()
-        
-            data class DeleteCats(val catIds: kotlin.collections.Set<kotlin.String>) : Method()
-
-            data class UpdateCat(
-                val catId: kotlin.String,
-                val newName: kotlin.Any,
-                val newHomes: kotlin.collections.List<kotlin.String>
-            ) : Method()
-          }
-        """.trimIndent()
+          |sealed class Method {
+          |  data class CatById(
+          |    val catId: kotlin.String
+          |  ) : Method()
+          |  
+          |  object Cats : Method()
+          |  
+          |  data class DeleteCats(
+          |    val catIds: kotlin.collections.Set<kotlin.String>
+          |  ) : Method()
+          |  
+          |  data class FetchCatById(
+          |    val catId: kotlin.String
+          |  ) : Method()
+          |  
+          |  object FetchCats : Method()
+          |  
+          |  data class UpdateCat(
+          |      val catId: kotlin.String,
+          |      val newName: kotlin.Any?,
+          |      val newHomes: kotlin.collections.List<kotlin.String?>
+          |  ) : Method()
+          |}
+        """.trimMargin()
       )
   }
 
@@ -63,67 +69,67 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
     assertThat(returnsBuilderClass.toString())
       .isEqualToIgnoringWhitespace(
         """
-          class ReturnsBuilder {
-            private var fetchCatsImpl: (() -> kotlin.Unit)? = null
-          
-            private var fetchCatByIdImpl: ((catId: kotlin.String) -> kotlin.Unit)? = null
-          
-            private var catsImpl: (() -> kotlin.collections.List<kotlin.Any>)? = null
-          
-            private var catByIdImpl: ((catId: kotlin.String) -> kotlin.Any)? = null
-          
-            private var deleteCatsImpl: ((catIds: kotlin.collections.Set<kotlin.String>) -> kotlin.Unit)? = null
-          
-            private var updateCatImpl: ((
-                catId: kotlin.String,
-                newName: kotlin.Any,
-                newHomes: kotlin.collections.List<kotlin.String>
-            ) -> kotlin.Unit)? = null
-          
-            fun fetchCats(impl: () -> kotlin.Unit): ReturnsBuilder {
-                this.fetchCatsImpl = impl
-                return this
-            }
-          
-            fun fetchCatById(impl: (catId: kotlin.String) -> kotlin.Unit): ReturnsBuilder {
-                this.fetchCatByIdImpl = impl
-                return this
-            }
-          
-            fun cats(impl: () -> kotlin.collections.List<kotlin.Any>): ReturnsBuilder {
-                this.catsImpl = impl
-                return this
-            }
-          
-            fun catById(impl: (catId: kotlin.String) -> kotlin.Any): ReturnsBuilder {
-                this.catByIdImpl = impl
-                return this
-            }
-          
-            fun deleteCats(impl: (catIds: kotlin.collections.Set<kotlin.String>) -> kotlin.Unit): ReturnsBuilder {
-                this.deleteCatsImpl = impl
-                return this
-            }
-          
-            fun updateCat(impl: (
-                catId: kotlin.String,
-                newName: kotlin.Any,
-                newHomes: kotlin.collections.List<kotlin.String>
-            ) -> kotlin.Unit): ReturnsBuilder {
-                this.updateCatImpl = impl
-                return this
-            }
-            
-            fun build(): ReturnsImpl = ReturnsImpl(
-              fetchCatsImpl,
-              fetchCatByIdImpl,
-              catsImpl,
-              catByIdImpl,
-              deleteCatsImpl,
-              updateCatImpl
-            )
-          }
-        """.trimIndent()
+          |class ReturnsBuilder {
+          |  private var catByIdImpl: ((catId: kotlin.String) -> kotlin.Any?)? = null
+          |  
+          |  private var catsImpl: (() -> kotlin.collections.List<kotlin.Any>)? = null
+          |  
+          |  private var deleteCatsImpl: ((catIds: kotlin.collections.Set<kotlin.String>) -> kotlin.Unit)? = null
+          |
+          |  private var fetchCatByIdImpl: ((catId: kotlin.String) -> kotlin.Unit)? = null
+          |
+          |  private var fetchCatsImpl: (() -> kotlin.Unit)? = null
+          |
+          |  private var updateCatImpl: ((
+          |      catId: kotlin.String,
+          |      newName: kotlin.Any?,
+          |      newHomes: kotlin.collections.List<kotlin.String?>
+          |  ) -> kotlin.Unit)? = null
+          |
+          |  fun catById(impl: (catId: kotlin.String) -> kotlin.Any?): ReturnsBuilder {
+          |      this.catByIdImpl = impl
+          |      return this
+          |  }
+          |
+          |  fun cats(impl: () -> kotlin.collections.List<kotlin.Any>): ReturnsBuilder {
+          |      this.catsImpl = impl
+          |      return this
+          |  }
+          |  
+          |  fun deleteCats(impl: (catIds: kotlin.collections.Set<kotlin.String>) -> kotlin.Unit): ReturnsBuilder {
+          |      this.deleteCatsImpl = impl
+          |      return this
+          |  }
+          |  
+          |  fun fetchCatById(impl: (catId: kotlin.String) -> kotlin.Unit): ReturnsBuilder {
+          |      this.fetchCatByIdImpl = impl
+          |      return this
+          |  }
+          |  
+          |  fun fetchCats(impl: () -> kotlin.Unit): ReturnsBuilder {
+          |      this.fetchCatsImpl = impl
+          |      return this
+          |  }
+          |
+          |  fun updateCat(impl: (
+          |      catId: kotlin.String,
+          |      newName: kotlin.Any?,
+          |      newHomes: kotlin.collections.List<kotlin.String?>
+          |  ) -> kotlin.Unit): ReturnsBuilder {
+          |      this.updateCatImpl = impl
+          |      return this
+          |  }
+          |  
+          |  fun build(): ReturnsImpl = ReturnsImpl(
+          |    catByIdImpl,
+          |    catsImpl,
+          |    deleteCatsImpl,
+          |    fetchCatByIdImpl,
+          |    fetchCatsImpl,
+          |    updateCatImpl
+          |  )
+          |}
+        """.trimMargin()
       )
   }
 
@@ -137,19 +143,19 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
     assertThat(returnsBuilderClass.toString())
       .isEqualToIgnoringWhitespace(
         """
-          data class ReturnsImpl(
-            val fetchCatsImpl: (() -> kotlin.Unit)?,
-            val fetchCatByIdImpl: ((catId: kotlin.String) -> kotlin.Unit)?,
-            val catsImpl: (() -> kotlin.collections.List<kotlin.Any>)?,
-            val catByIdImpl: ((catId: kotlin.String) -> kotlin.Any)?,
-            val deleteCatsImpl: ((catIds: kotlin.collections.Set<kotlin.String>) -> kotlin.Unit)?,
-            val updateCatImpl: ((
-                catId: kotlin.String,
-                newName: kotlin.Any,
-                newHomes: kotlin.collections.List<kotlin.String>
-            ) -> kotlin.Unit)?
-          )
-        """.trimIndent()
+          |data class ReturnsImpl(
+          |val catByIdImpl: ((catId: kotlin.String) -> kotlin.Any?)?,
+          |val catsImpl: (() -> kotlin.collections.List<kotlin.Any>)?,
+          |val deleteCatsImpl: ((catIds: kotlin.collections.Set<kotlin.String>) -> kotlin.Unit)?,
+          |val fetchCatByIdImpl: ((catId: kotlin.String) -> kotlin.Unit)?,
+          |val fetchCatsImpl: (() -> kotlin.Unit)?,
+          |val updateCatImpl: ((
+          |  catId: kotlin.String,
+          |  newName: kotlin.Any?,
+          |  newHomes: kotlin.collections.List<kotlin.String?>
+          |) -> kotlin.Unit)?
+          |)
+        """.trimMargin()
       )
   }
 
@@ -163,12 +169,12 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
     assertThat(returnsFun.toString())
       .isEqualToIgnoringWhitespace(
         """
-          fun returns(init: ReturnsBuilder.() -> kotlin.Unit) {
-            val builder = ReturnsBuilder()
-            builder.init()
-            this.returnsImpl = builder.build() 
-          }
-        """.trimIndent()
+          |fun returns(init: ReturnsBuilder.() -> kotlin.Unit) {
+          |  val builder = ReturnsBuilder()
+          |  builder.init()
+          |  this.returnsImpl = builder.build() 
+          |}
+        """.trimMargin()
       )
   }
 
@@ -182,44 +188,44 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
     assertThat(implFunctions.joinToString("\n\r"))
       .isEqualToIgnoringWhitespace(
         """
-          override fun fetchCats() {
-              this.methodCalls.add(Method.FetchCats)
-              returnsImpl?.fetchCatsImpl?.invoke()
-          }
-          
-          override fun fetchCatById(catId: kotlin.String) {
-              this.methodCalls.add(Method.FetchCatById(catId))
-              returnsImpl?.fetchCatByIdImpl?.invoke(catId)
-          }
-          
-          override fun cats(): kotlin.collections.List<kotlin.Any> {
-              this.methodCalls.add(Method.Cats)
-              val classImpl = this.returnsImpl ?: error("returns not found for method cats()")
-              val methodImpl = classImpl.catsImpl ?: error("returns not found for method cats()")
-              return methodImpl.invoke()
-          }
-          
-          override fun catById(catId: kotlin.String): kotlin.Any {
-              this.methodCalls.add(Method.CatById(catId))
-              val classImpl = this.returnsImpl ?: error("returns not found for method catById(catId)")
-              val methodImpl = classImpl.catByIdImpl ?: error("returns not found for method catById(catId)")
-              return methodImpl.invoke(catId)
-          }
-          
-          override fun deleteCats(catIds: kotlin.collections.Set<kotlin.String>) {
-              this.methodCalls.add(Method.DeleteCats(catIds))
-              returnsImpl?.deleteCatsImpl?.invoke(catIds)
-          }
-          
-          override fun updateCat(
-              catId: kotlin.String,
-              newName: kotlin.Any,
-              newHomes: kotlin.collections.List<kotlin.String>
-          ) {
-              this.methodCalls.add(Method.UpdateCat(catId, newName, newHomes))
-              returnsImpl?.updateCatImpl?.invoke(catId, newName, newHomes)
-          }
-        """.trimIndent()
+          |override fun catById(catId: kotlin.String): kotlin.Any? {
+          |    this.methodCalls.add(Method.CatById(catId))
+          |    val classImpl = this.returnsImpl ?: error("returns not found for method catById(catId)")
+          |    val methodImpl = classImpl.catByIdImpl ?: error("returns not found for method catById(catId)")
+          |    return methodImpl.invoke(catId)
+          |}
+          |
+          |override fun cats(): kotlin.collections.List<kotlin.Any> {
+          |    this.methodCalls.add(Method.Cats)
+          |    val classImpl = this.returnsImpl ?: error("returns not found for method cats()")
+          |    val methodImpl = classImpl.catsImpl ?: error("returns not found for method cats()")
+          |    return methodImpl.invoke()
+          |}
+          |
+          |override fun deleteCats(catIds: kotlin.collections.Set<kotlin.String>) {
+          |    this.methodCalls.add(Method.DeleteCats(catIds))
+          |    returnsImpl?.deleteCatsImpl?.invoke(catIds)
+          |}
+          |
+          |override fun fetchCatById(catId: kotlin.String) {
+          |    this.methodCalls.add(Method.FetchCatById(catId))
+          |    returnsImpl?.fetchCatByIdImpl?.invoke(catId)
+          |}
+          |
+          |override fun fetchCats() {
+          |    this.methodCalls.add(Method.FetchCats)
+          |    returnsImpl?.fetchCatsImpl?.invoke()
+          |}
+          |
+          |override fun updateCat(
+          |    catId: kotlin.String,
+          |    newName: kotlin.Any?,
+          |    newHomes: kotlin.collections.List<kotlin.String?>
+          |) {
+          |    this.methodCalls.add(Method.UpdateCat(catId, newName, newHomes))
+          |    returnsImpl?.updateCatImpl?.invoke(catId, newName, newHomes)
+          |}
+        """.trimMargin()
       )
   }
 

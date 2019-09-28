@@ -4,36 +4,34 @@ import com.github.rougsig.fakito.processor.generator.FakitoGenerator
 import com.github.rougsig.fakito.processor.generator.Generator
 import com.github.rougsig.fakito.runtime.Fakito
 import com.google.auto.service.AutoService
-import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
-import java.io.File
+import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
+import javax.annotation.processing.AbstractProcessor
+import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 
 @AutoService(Processor::class)
-class FakitoProcessor : KotlinAbstractProcessor() {
+class FakitoProcessor : AbstractProcessor() {
   private val fakitoAnnotation = Fakito::class.java
 
+  private lateinit var processEnv: ProcessingEnvironment
   internal var fakitoGenerator: Generator<FakitoGenerator.Params> = FakitoGenerator
 
+  override fun init(processingEnv: ProcessingEnvironment) {
+    processEnv = processingEnv
+    super.init(processingEnv)
+  }
+
+  @KotlinPoetMetadataPreview
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
     for (type in roundEnv.getElementsAnnotatedWith(fakitoAnnotation)) {
       val targetElement = type as? TypeElement ?: continue
-      val params = FakitoGenerator.Params.get(this, targetElement)
-      fakitoGenerator.generateAndWrite(params)
+      val params = FakitoGenerator.Params.get(processEnv, targetElement)
+      fakitoGenerator.generateFile(params).writeTo(processEnv.filer)
     }
     return true
-  }
-
-  private fun <T> Generator<T>.generateAndWrite(params: T) {
-    val fileSpec = generateFile(params)
-
-    val outputDirPath = "$generatedDir/${fileSpec.packageName.replace(".", "/")}"
-    val outputDir = File(outputDirPath).also { it.mkdirs() }
-
-    val file = File(outputDir, "${fileSpec.name}.kt")
-    file.writeText(fileSpec.toString())
   }
 
   override fun getSupportedAnnotationTypes(): Set<String> {
