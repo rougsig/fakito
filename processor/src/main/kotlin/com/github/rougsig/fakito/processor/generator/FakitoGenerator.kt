@@ -186,24 +186,11 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
         .addFunction(FunSpec
           .builder("build")
           .returns(ClassName.bestGuess("ReturnsImpl"))
-          .addCode(CodeBlock
-            .builder()
-            .add("return ")
-            .add(CodeBlock
-              .builder()
-              .addStatement("ReturnsImpl(")
-              .apply {
-                funSpecs.forEachIndexed { i, funSpec ->
-                  if (i == funSpecs.lastIndex) {
-                    addStatement("${funSpec.name}Impl")
-                  } else {
-                    addStatement("${funSpec.name}Impl,")
-                  }
-                }
-              }
-              .addStatement(")")
-              .build())
-            .build())
+          .addStatement("""
+            |return ReturnsImpl(
+            |${funSpecs.joinToString(",\n") { funSpec -> "  ${funSpec.name}Impl" }}
+            |)
+          """.trimMargin())
           .build())
         .build())
   }
