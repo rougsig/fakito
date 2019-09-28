@@ -18,6 +18,8 @@ dependencies {
   kapt(deps.getValue("autoService"))
   kaptTest(deps.getValue("autoService"))
 
+  testImplementation(deps.getValue("rxJava"))
+  testImplementation(deps.getValue("rxRelay"))
   testImplementation(deps.getValue("compileTesting")) {
     exclude("junit:junit")
   }

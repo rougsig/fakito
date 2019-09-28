@@ -69,7 +69,7 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
     assertThat(returnsBuilderClass.toString())
       .isEqualToIgnoringWhitespace(
         """
-          |class ReturnsBuilder {
+          |inner class ReturnsBuilder {
           |  private var catByIdImpl: ((catId: kotlin.String) -> kotlin.Any?)? = null
           |  
           |  private var catsImpl: (() -> kotlin.collections.List<kotlin.Any>)? = null

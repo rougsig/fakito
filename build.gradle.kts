@@ -10,7 +10,9 @@ versions = mapOf(
   "autoService" to "1.0-rc4",
   "compileTesting" to "0.15",
   "testng" to "6.10",
-  "assertjCore" to "3.6.2"
+  "assertjCore" to "3.6.2",
+  "rxJava" to "2.2.12",
+  "rxRelay" to "2.1.1"
 )
 
 deps = mapOf(
@@ -22,7 +24,9 @@ deps = mapOf(
   "autoService" to "com.google.auto.service:auto-service:${versions["autoService"]}",
   "compileTesting" to "com.google.testing.compile:compile-testing:${versions["compileTesting"]}",
   "testng" to "org.testng:testng:${versions["testng"]}",
-  "assertjCore" to "org.assertj:assertj-core:${versions["assertjCore"]}"
+  "assertjCore" to "org.assertj:assertj-core:${versions["assertjCore"]}",
+  "rxJava" to "io.reactivex.rxjava2:rxjava:${versions["rxJava"]}",
+  "rxRelay" to "com.jakewharton.rxrelay2:rxrelay:${versions["rxRelay"]}"
 )
 
 plugins {

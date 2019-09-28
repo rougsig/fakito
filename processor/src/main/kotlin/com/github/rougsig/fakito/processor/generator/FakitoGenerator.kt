@@ -1,10 +1,15 @@
 package com.github.rougsig.fakito.processor.generator
 
+import com.github.rougsig.fakito.processor.OBSERVABLE_CLASS_NAME
+import com.github.rougsig.fakito.processor.PUBLISH_RELAY_CLASS_NAME
+import com.github.rougsig.fakito.processor.UNIT_CLASS_NAME
+import com.github.rougsig.fakito.processor.createParameterizedRelayType
 import com.github.rougsig.fakito.processor.extension.asTypeElement
 import com.github.rougsig.fakito.processor.extension.beginWithUpperCase
 import com.github.rougsig.fakito.processor.extension.getAnnotationMirror
 import com.github.rougsig.fakito.processor.extension.getFieldByName
 import com.github.rougsig.fakito.runtime.Fakito
+import com.github.rougsig.fakito.runtime.RxFakito
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
@@ -12,6 +17,7 @@ import com.squareup.kotlinpoet.metadata.specs.toFileSpec
 import com.squareup.kotlinpoet.metadata.specs.toTypeSpec
 import java.util.*
 import javax.annotation.processing.ProcessingEnvironment
+import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
 
@@ -20,27 +26,38 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
     val fileSpec: FileSpec,
     val typeSpec: TypeSpec,
     val fakitoTarget: TypeElement,
-    val funSpecs: List<FunSpec>
+    val funSpecs: List<FunSpec>,
+    val rxFunSpecs: List<FunSpec>,
+    val generateRxJavaUtils: Boolean
   ) {
 
     @KotlinPoetMetadataPreview
     companion object {
       fun get(env: ProcessingEnvironment, targetElement: TypeElement): Params {
-        val fakitoTarget = unwrapTarget(env, targetElement)
+        val annotation = targetElement.getAnnotationMirror(Fakito::class)
+        val rxAnnotation = targetElement.getAnnotationMirror(RxFakito::class)
+
+        val isRxAnnotation = rxAnnotation != null
+
+        val fakitoTarget = unwrapTarget(env, if (isRxAnnotation) rxAnnotation!! else annotation!!)
         val typeSpec = fakitoTarget.toTypeSpec()
 
         return Params(
           fileSpec = targetElement.toFileSpec(),
           typeSpec = typeSpec,
           fakitoTarget = fakitoTarget,
-          funSpecs = typeSpec.funSpecs
+          funSpecs = typeSpec.funSpecs,
+          generateRxJavaUtils = isRxAnnotation,
+          rxFunSpecs = typeSpec.funSpecs
+            .filter {
+              val rawType = (it.returnType as? ParameterizedTypeName)?.rawType
+              rawType?.toString() == OBSERVABLE_CLASS_NAME.toString() && it.parameters.isEmpty()
+            }
         )
       }
 
-      private fun unwrapTarget(env: ProcessingEnvironment, targetElement: TypeElement): TypeElement {
-        val annotation = targetElement.getAnnotationMirror(Fakito::class)
-        val annotationMirror = annotation!!.getFieldByName("value")!!.value as TypeMirror
-        return annotationMirror.asTypeElement(env)
+      private fun unwrapTarget(env: ProcessingEnvironment, annotationMirror: AnnotationMirror): TypeElement {
+        return (annotationMirror.getFieldByName("value")!!.value as TypeMirror).asTypeElement(env)
       }
     }
   }
@@ -51,13 +68,61 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
         .classBuilder("${params.fileSpec.name}Generated")
         .addModifiers(KModifier.ABSTRACT)
         .addSuperinterface(params.fakitoTarget.asClassName())
+        .apply {
+          if (params.generateRxJavaUtils) {
+            addCreateDefaultRelayFunction()
+            addRelayProperties(params.rxFunSpecs)
+            addSendIntentFunctions(params.rxFunSpecs)
+          }
+        }
         .addMethodClass(params.funSpecs)
-        .addReturnsBuilder(params.funSpecs)
+        .addReturnsBuilder(params.funSpecs, if (params.generateRxJavaUtils) params.rxFunSpecs else emptyList())
         .addReturnsImpl(params.funSpecs)
         .addReturnsBuilderInitFun(params.funSpecs)
         .addImplFunctions(params.funSpecs)
         .build()
     )
+  }
+
+  private fun TypeSpec.Builder.addCreateDefaultRelayFunction(): TypeSpec.Builder {
+    return this
+      .addFunction(FunSpec
+        .builder(CREATE_DEFAULT_RELAY_FUN_NAME)
+        .addModifiers(KModifier.PROTECTED, KModifier.OPEN)
+        .addTypeVariable(TypeVariableName("T"))
+        .returns(createParameterizedRelayType(TypeVariableName("T")))
+        .addStatement("return %T.create<T>()", PUBLISH_RELAY_CLASS_NAME)
+        .build())
+  }
+
+  private fun TypeSpec.Builder.addRelayProperties(rxFunSpecs: List<FunSpec>): TypeSpec.Builder {
+    return this
+      .addProperties(rxFunSpecs.map { funSpec ->
+        val rxType = (funSpec.returnType as ParameterizedTypeName).typeArguments.first()
+        PropertySpec
+          .builder("${funSpec.name}Relay", createParameterizedRelayType(rxType))
+          .addModifiers(KModifier.PROTECTED, KModifier.OPEN)
+          .delegate("lazy { %L<%T>() }", CREATE_DEFAULT_RELAY_FUN_NAME, rxType)
+          .build()
+      })
+  }
+
+  private fun TypeSpec.Builder.addSendIntentFunctions(rxFunSpecs: List<FunSpec>): TypeSpec.Builder {
+    return this
+      .addFunctions(rxFunSpecs.map { funSpec ->
+        val rxType = (funSpec.returnType as ParameterizedTypeName).typeArguments.first()
+        FunSpec
+          .builder("send${funSpec.name.beginWithUpperCase()}")
+          .apply {
+            if (funSpec.returnType != null) {
+              addParameter("value", rxType)
+              addStatement("%L.accept(value)", "${funSpec.name}Relay")
+            } else {
+              addStatement("%L.accept(%T)", "${funSpec.name}Relay", UNIT_CLASS_NAME)
+            }
+          }
+          .build()
+      })
   }
 
   private fun TypeSpec.Builder.addMethodClass(
@@ -123,7 +188,7 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
               .builder("${funSpec.name}Impl", LambdaTypeName
                 .get(
                   parameters = funSpec.parameters,
-                  returnType = funSpec.returnType ?: Unit::class.asTypeName()
+                  returnType = funSpec.returnType ?: UNIT_CLASS_NAME
                 )
                 .copy(nullable = true))
               .build()
@@ -134,7 +199,7 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
             .builder("${funSpec.name}Impl", LambdaTypeName
               .get(
                 parameters = funSpec.parameters,
-                returnType = funSpec.returnType ?: Unit::class.asTypeName()
+                returnType = funSpec.returnType ?: UNIT_CLASS_NAME
               )
               .copy(nullable = true))
             .initializer("${funSpec.name}Impl")
@@ -144,7 +209,8 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
   }
 
   private fun TypeSpec.Builder.addReturnsBuilder(
-    funSpecs: List<FunSpec>
+    funSpecs: List<FunSpec>,
+    rxFunSpecs: List<FunSpec>
   ): TypeSpec.Builder {
     if (funSpecs.isEmpty()) return this
 
@@ -153,17 +219,24 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
     return this
       .addType(TypeSpec
         .classBuilder(returnsBuilderClassName)
+        .addModifiers(KModifier.INNER)
         .addProperties(funSpecs.map { funSpec ->
           PropertySpec
             .builder("${funSpec.name}Impl", LambdaTypeName
               .get(
                 parameters = funSpec.parameters,
-                returnType = funSpec.returnType ?: Unit::class.asTypeName()
+                returnType = funSpec.returnType ?: UNIT_CLASS_NAME
               )
               .copy(nullable = true))
             .addModifiers(KModifier.PRIVATE)
             .mutable()
-            .initializer("null")
+            .apply {
+              if (rxFunSpecs.contains(funSpec)) {
+                initializer("{ ${funSpec.name}Relay }")
+              } else {
+                initializer("null")
+              }
+            }
             .build()
         })
         .addFunctions(funSpecs.map { funSpec ->
@@ -175,7 +248,7 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
               .builder(implParamName, LambdaTypeName
                 .get(
                   parameters = funSpec.parameters,
-                  returnType = funSpec.returnType ?: Unit::class.asTypeName()
+                  returnType = funSpec.returnType ?: UNIT_CLASS_NAME
                 ))
               .build())
             .addStatement("this.${funSpec.name}Impl = $implParamName")
@@ -212,7 +285,7 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
         .addParameter(ParameterSpec
           .builder("init", LambdaTypeName.get(
             receiver = ClassName.bestGuess("ReturnsBuilder"),
-            returnType = Unit::class.asTypeName()
+            returnType = UNIT_CLASS_NAME
           ))
           .build()
         )
@@ -252,8 +325,10 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
               addStatement("return methodImpl.invoke($params)")
             }
           }
-          .returns(method.returnType ?: Unit::class.asTypeName())
+          .returns(method.returnType ?: UNIT_CLASS_NAME)
           .build()
       })
   }
 }
+
+private const val CREATE_DEFAULT_RELAY_FUN_NAME = "createDefaultRelay"
