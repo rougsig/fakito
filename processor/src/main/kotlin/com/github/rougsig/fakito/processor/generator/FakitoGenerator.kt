@@ -25,6 +25,7 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
   data class Params(
     val fileSpec: FileSpec,
     val typeSpec: TypeSpec,
+    val isInternal: Boolean,
     val fakitoTarget: TypeElement,
     val funSpecs: List<FunSpec>,
     val rxFunSpecs: List<FunSpec>,
@@ -46,6 +47,7 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
           fileSpec = targetElement.toFileSpec(),
           typeSpec = typeSpec,
           fakitoTarget = fakitoTarget,
+          isInternal = targetElement.toTypeSpec().modifiers.contains(KModifier.INTERNAL),
           funSpecs = typeSpec.funSpecs,
           generateRxJavaUtils = isRxAnnotation,
           rxFunSpecs = typeSpec.funSpecs
@@ -67,6 +69,7 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
       TypeSpec
         .classBuilder("${params.fileSpec.name}Generated")
         .addModifiers(KModifier.ABSTRACT)
+        .apply { if (params.isInternal) addModifiers(KModifier.INTERNAL) }
         .addSuperinterface(params.fakitoTarget.asClassName())
         .apply {
           if (params.generateRxJavaUtils) {

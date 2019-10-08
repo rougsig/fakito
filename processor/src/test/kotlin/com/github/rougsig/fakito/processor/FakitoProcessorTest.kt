@@ -23,6 +23,22 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
   }
 
   @Test
+  fun `internal source should generate internal implementation`() {
+    val generatedFiles = runProcessor("internal.CatRepository", "internal.CatRepositoryFake")
+
+    assertThat(generatedFiles.size).isEqualTo(1)
+    val generatedFile = generatedFiles.first()
+    assertThat(generatedFile.toString())
+      .isEqualToIgnoringWhitespace(
+        """
+          |package com.github.rougsig.fakito.processor.testdata.internal
+          |
+          |internal abstract class CatRepositoryFakeGenerated : CatRepository
+        """.trimMargin()
+      )
+  }
+
+  @Test
   fun `all methods should be declarated in Method sealed class`() {
     val generatedFiles = runProcessor("methods.CatRepository", "methods.CatRepositoryFake")
 
