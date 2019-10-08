@@ -39,6 +39,24 @@ internal class FakitoProcessorTest : APTest("com.github.rougsig.fakito.processor
   }
 
   @Test
+  fun `methods with default args should generate successfully`() {
+    val generatedFiles = runProcessor("defaultarg.CatRepository", "defaultarg.CatRepositoryFake")
+
+    assertThat(generatedFiles.size).isEqualTo(1)
+    val generatedFile = generatedFiles.first()
+    val implFunctions = (generatedFile.members.first() as TypeSpec).funSpecs.filterNot { it.name == "returns" }
+    assertThat(implFunctions.joinToString("\n\r"))
+      .isEqualToIgnoringWhitespace(
+        """
+        |override fun fetchContent(skipCache: kotlin.Boolean) {
+        |  this.methodCalls.add(Method.FetchContent(skipCache))
+        |  returnsImpl?.fetchContentImpl?.invoke(skipCache)
+        |}
+        """.trimMargin()
+      )
+  }
+
+  @Test
   fun `all methods should be declarated in Method sealed class`() {
     val generatedFiles = runProcessor("methods.CatRepository", "methods.CatRepositoryFake")
 

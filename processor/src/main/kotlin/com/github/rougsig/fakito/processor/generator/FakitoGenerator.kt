@@ -157,7 +157,9 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
                   .addModifiers(KModifier.DATA)
                   .primaryConstructor(FunSpec
                     .constructorBuilder()
-                    .addParameters(funSpec.parameters)
+                    .addParameters(funSpec.parameters.map { param ->
+                      ParameterSpec(name = param.name, type = param.type)
+                    })
                     .build())
                   .addProperties(funSpec.parameters.map { param ->
                     PropertySpec
@@ -190,7 +192,9 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
             ParameterSpec
               .builder("${funSpec.name}Impl", LambdaTypeName
                 .get(
-                  parameters = funSpec.parameters,
+                  parameters = funSpec.parameters.map { param ->
+                    ParameterSpec(name = param.name, type = param.type)
+                  },
                   returnType = funSpec.returnType ?: UNIT_CLASS_NAME
                 )
                 .copy(nullable = true))
@@ -201,7 +205,9 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
           PropertySpec
             .builder("${funSpec.name}Impl", LambdaTypeName
               .get(
-                parameters = funSpec.parameters,
+                parameters = funSpec.parameters.map { param ->
+                  ParameterSpec(name = param.name, type = param.type)
+                },
                 returnType = funSpec.returnType ?: UNIT_CLASS_NAME
               )
               .copy(nullable = true))
@@ -227,7 +233,9 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
           PropertySpec
             .builder("${funSpec.name}Impl", LambdaTypeName
               .get(
-                parameters = funSpec.parameters,
+                parameters = funSpec.parameters.map { param ->
+                  ParameterSpec(name = param.name, type = param.type)
+                },
                 returnType = funSpec.returnType ?: UNIT_CLASS_NAME
               )
               .copy(nullable = true))
@@ -250,7 +258,9 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
             .addParameter(ParameterSpec
               .builder(implParamName, LambdaTypeName
                 .get(
-                  parameters = funSpec.parameters,
+                  parameters = funSpec.parameters.map { param ->
+                    ParameterSpec(name = param.name, type = param.type)
+                  },
                   returnType = funSpec.returnType ?: UNIT_CLASS_NAME
                 ))
               .build())
@@ -308,7 +318,9 @@ object FakitoGenerator : Generator<FakitoGenerator.Params> {
         FunSpec
           .builder(method.name)
           .addModifiers(KModifier.OVERRIDE)
-          .addParameters(method.parameters)
+          .addParameters(method.parameters.map { param ->
+            ParameterSpec(name = param.name, type = param.type)
+          })
           .apply {
             val params = method.parameters.joinToString(", ") { it.name }
 
