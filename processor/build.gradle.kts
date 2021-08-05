@@ -24,9 +24,3 @@ dependencies {
     exclude("junit:junit")
   }
 }
-
-kapt {
-  generateStubs = true
-}
-
-apply("../gradle/gradle-mvn-push.gradle")
