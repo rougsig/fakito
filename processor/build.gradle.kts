@@ -11,7 +11,6 @@ dependencies {
     exclude("org.jetbrains.kotlin:kotlin-reflect")
   }
   implementation(deps.getValue("kotlinpoetMetadata"))
-  implementation(deps.getValue("kotlinpoetMetadataSpecs"))
   implementation(deps.getValue("kotlinReflect"))
   implementation(deps.getValue("autoService"))
 

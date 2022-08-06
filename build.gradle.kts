@@ -5,8 +5,8 @@ var versions: Map<String, String> by extra
 var deps: Map<String, String> by extra
 
 versions = mapOf(
-  "kotlin" to "1.5.21", // see also plugin block below
-  "kotlinpoet" to "1.9.0",
+  "kotlin" to "1.7.10", // see also plugin block below
+  "kotlinpoet" to "1.12.0",
   "autoService" to "1.0-rc4",
   "compileTesting" to "0.15",
   "testng" to "6.10",
@@ -19,7 +19,6 @@ deps = mapOf(
   "kotlinStdlib8" to "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions["kotlin"]}",
   "kotlinpoet" to "com.squareup:kotlinpoet:${versions["kotlinpoet"]}",
   "kotlinpoetMetadata" to "com.squareup:kotlinpoet-metadata:${versions["kotlinpoet"]}",
-  "kotlinpoetMetadataSpecs" to "com.squareup:kotlinpoet-metadata-specs:${versions["kotlinpoet"]}",
   "kotlinReflect" to "org.jetbrains.kotlin:kotlin-reflect:${versions["kotlin"]}",
   "autoService" to "com.google.auto.service:auto-service:${versions["autoService"]}",
   "compileTesting" to "com.google.testing.compile:compile-testing:${versions["compileTesting"]}",
@@ -31,7 +30,7 @@ deps = mapOf(
 
 plugins {
   java
-  kotlin("jvm") version "1.5.21"
+  kotlin("jvm") version "1.7.10"
   `maven-publish`
   signing
   id("org.jetbrains.dokka") version "1.4.0-rc"
